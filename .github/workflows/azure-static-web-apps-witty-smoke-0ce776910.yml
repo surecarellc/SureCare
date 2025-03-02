@@ -34,7 +34,7 @@ jobs:
         run: node -v  # Prints "v20.x.x" to confirm Node.js 20 is installed
 
       - name: Install Dependencies
-        run: npm ci  # Ensures all packages are installed
+        run: npm install  # Ensures all packages are installed
 
       - name: Build the App
         run: npm run build  # Creates the production build
