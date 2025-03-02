@@ -40,7 +40,7 @@ const LaunchPage = () => {
             >
               About
             </button>
-            <a href="#" className="nav-link text-dark mx-3">Help</a>
+            <a href="/" className="nav-link text-dark mx-3">Help</a>
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"
               onClick={goToSignIn}

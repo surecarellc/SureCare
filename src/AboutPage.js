@@ -24,7 +24,7 @@ const AboutPage = () => {
       {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm w-100 border-bottom border-dark" style={{ padding: "1rem 2rem" }}>
         <div className="container-fluid d-flex justify-content-between">
-          <a className="navbar-brand" href="#" style={{ fontSize: '2rem', fontWeight: '700' }}>
+          <a className="navbar-brand" href="/" style={{ fontSize: '2rem', fontWeight: '700' }}>
             <span style={{ color: '#241A90' }}>Sure</span>
             <span style={{ color: '#3AADA4' }}>Care</span>
           </a>
@@ -35,7 +35,7 @@ const AboutPage = () => {
             >
               Home
             </button>
-            <a href="#" className="nav-link text-dark mx-3">Help</a>
+            <a href="/" className="nav-link text-dark mx-3">Help</a>
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"
               onClick={goToSignIn}

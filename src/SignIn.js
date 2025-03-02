@@ -49,7 +49,7 @@ const SignIn = () => {
           <button type="submit" className="btn btn-success w-100">Sign In</button>
         </form>
         <div className="text-center mt-2">
-          <a href="#" className="text-decoration-none">Forgot password?</a>
+          <a href="/" className="text-decoration-none">Forgot password?</a>
         </div>
         <div className="text-center mt-3">
           <button onClick={() => navigate("/signup")} className="btn btn-outline-dark">Sign Up</button>
