@@ -1,8 +1,5 @@
 {
     "navigationFallback": {
         "rewrite": "/index.html"
-    }, 
-    "platforms": {
-        "nodejs": "20"
     }
 }
