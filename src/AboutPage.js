@@ -7,6 +7,7 @@ const AboutPage = () => {
 
   const goToLaunchPage = () => {
     navigate("/"); // Navigate to the LaunchPage
+    //comment
   };
 
   const goToSignIn = () => {
