@@ -18,6 +18,10 @@ const LaunchPage = () => {
     navigate("/signin");
   };
 
+  const goToHelpPage = () => {
+    navigate("/help");
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -100 }}
@@ -40,7 +44,12 @@ const LaunchPage = () => {
             >
               About
             </button>
-            <a href="/" className="nav-link text-dark mx-3">Help</a>
+            <button
+              className="nav-link text-dark mx-3 bg-transparent border-0"
+              onClick={goToHelpPage}
+            >
+              Help
+            </button>
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"
               onClick={goToSignIn}

@@ -2,27 +2,26 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const AboutPage = () => {
+const HelpPage = () => {
   const navigate = useNavigate();
 
   const goToLaunchPage = () => {
-    navigate("/"); // Navigate to the LaunchPage
-    //comment
+    navigate("/");
   };
 
   const goToSignIn = () => {
     navigate("/signin");
   };
 
-  const goToHelpPage = () => {
-    navigate("/help");
+  const goToAboutPage = () => {
+    navigate("/about");
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 100 }}  // Slide in from right
-      animate={{ opacity: 1, x: 0 }}  // Animate in
-      exit={{ opacity: 0, x: -100 }}  // Animate out lmao
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -100 }}
       transition={{ duration: 0.5 }}
       className="d-flex flex-column min-vh-100 align-items-center text-center p-4"
     >
@@ -42,9 +41,9 @@ const AboutPage = () => {
             </button>
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToHelpPage}
+              onClick={goToAboutPage}
             >
-              Help
+              About
             </button>
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"
@@ -56,7 +55,7 @@ const AboutPage = () => {
         </div>
       </nav>
 
-      {/* About Section */}
+      {/* Help Section */}
       <motion.div 
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
@@ -64,17 +63,21 @@ const AboutPage = () => {
         className="flex-fill d-flex flex-column justify-content-center align-items-center w-75 p-5 text-black"
       >
         <h1 className="display-4 font-weight-bold" style={{ fontFamily: 'Outfit, sans-serif' }}>
-          Who We Are
+          How We Help
         </h1>
         <p className="lead" style={{ fontFamily: 'Outfit, sans-serif', fontWeight: '300', maxWidth: '800px' }}>
-          SureCare is a healthcare technology company dedicated to bringing transparency, affordability, and accessibility to medical services in the United States. We believe that every American deserves to know the real cost of healthcare before stepping into a doctor’s office or hospital. Our mission is to empower consumers with accurate pricing, provider quality insights, and expert guidance to help them make informed medical decisions.
+          At SureCare, we are committed to helping you navigate your options with confidence and clarity. 
+          Our mission is to provide price transparency, empowering consumers like you to make informed 
+          decisions without the guesswork. Whether you have questions, need assistance, or just want to 
+          learn more, we are here to support you every step of the way.
         </p>
 
         <h2 className="display-5 font-weight-bold mt-4" style={{ fontFamily: 'Outfit, sans-serif' }}>
-          Our Mission
+          Contact Us
         </h2>
         <p className="lead" style={{ fontFamily: 'Outfit, sans-serif', fontWeight: '300', maxWidth: '800px' }}>
-          SureCare is revolutionizing the healthcare industry by providing a simple, user-friendly platform that enables individuals to compare real-time medical pricing, access high-quality providers, and receive on-demand medical guidance. By offering cost transparency, telehealth access, and top-rated provider recommendations, we aim to make healthcare more accessible and affordable for all. Whether you are uninsured, underinsured, or simply seeking better options, SureCare is your trusted resource for smarter healthcare decisions.
+          For any inquiries or support, feel free to reach out to us at
+          <a href="mailto:surecare.contact@gmail.com" className="text-lightblue" style={{ textDecoration: 'none' }}> surecare.contact@gmail.com</a>
         </p>
       </motion.div>
 
@@ -86,4 +89,4 @@ const AboutPage = () => {
   );
 };
 
-export default AboutPage;
+export default HelpPage;
