@@ -17,7 +17,7 @@ const AboutPage = () => {
     <motion.div
       initial={{ opacity: 0, x: 100 }}  // Slide in from right
       animate={{ opacity: 1, x: 0 }}  // Animate in
-      exit={{ opacity: 0, x: -100 }}  // Animate out
+      exit={{ opacity: 0, x: -100 }}  // Animate out lmao
       transition={{ duration: 0.5 }}
       className="d-flex flex-column min-vh-100 align-items-center text-center p-4"
     >
