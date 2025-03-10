@@ -26,24 +26,27 @@ const HelpPage = () => {
       className="d-flex flex-column min-vh-100 align-items-center text-center p-4"
     >
       {/* Navbar */}
-      <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm w-100 border-bottom border-dark" style={{ padding: "1rem 2rem" }}>
+      <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom border-dark px-0" 
+     style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 1000 }}>
         <div className="container-fluid d-flex justify-content-between">
-          <span className="navbar-brand" href="/" style={{ fontSize: '2rem', fontWeight: '700' }}>
+          <a 
+            className="navbar-brand cursor-pointer" 
+            onClick={goToLaunchPage} 
+            style={{ fontSize: '2rem', fontWeight: '700', cursor: 'pointer' }}>
             <span style={{ color: '#241A90' }}>Sure</span>
             <span style={{ color: '#3AADA4' }}>Care</span>
-          </span>
+          </a>
           <div className="d-flex">
             <button 
               className="nav-link text-dark mx-3 bg-transparent border-0" 
-              onClick={goToLaunchPage}
-            >
-              Home
-            </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
               onClick={goToAboutPage}
             >
               About
+            </button>
+            <button 
+              className="nav-link text-dark mx-3 bg-transparent border-0" 
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+              Help
             </button>
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"
@@ -82,7 +85,8 @@ const HelpPage = () => {
       </motion.div>
 
       {/* Footer */}
-      <footer className="text-center p-4 text-muted bg-white shadow-sm w-100 border-top border-dark">
+      <footer className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark px-0"
+        style={{ position: "fixed", bottom: 0, left: 0, right: 0, width: "100vw" }}>
         &copy; 2025 SureCare. All rights reserved.
       </footer>
     </motion.div>

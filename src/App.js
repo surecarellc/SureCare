@@ -7,6 +7,7 @@ import HelpPage from "./HelpPage";
 import Questionnaire from "./Questionnaire"; // The updated Questionnaire component
 import SignIn from "./SignIn"; // The SignIn component
 import SignUp from "./SignUp"; // The SignUp component
+import Results from "./Results";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/questionnaire" element={<Questionnaire />} /> {/* Updated Route */}
         <Route path="/signin" element={<SignIn />} /> {/* Added SignIn Route */}
         <Route path="/signup" element={<SignUp />} /> {/* Added SignUp Route */}
+        <Route path="/results" element={<Results />} /> {/* Added SignUp Route */}
       </Routes>
     </Router>
   );

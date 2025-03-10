@@ -90,7 +90,7 @@ const LaunchPage = () => {
           }}
         />
         <h1 className="display-4" style={{ fontWeight: '400', fontFamily: 'Outfit, sans-serif' }}>
-          find the right <br /> healthcare for you.
+          Find the right <br /> healthcare for you.
         </h1>
         <motion.button
           whileHover={{ scale: 1.1 }}
