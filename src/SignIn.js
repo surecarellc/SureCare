@@ -4,7 +4,13 @@ import { useNavigate } from "react-router-dom";
 import googleImage from "./components/google.png";
 
 const SignIn = () => {
+  //const navigate = useNavigate();
   const navigate = useNavigate();
+
+  const goToLaunchPage = () => {
+    navigate("/"); // Navigate to the LaunchPage
+  };
+
 
   return (
     <motion.div 
@@ -22,10 +28,15 @@ const SignIn = () => {
         style={{ width: "500px" }}
       >
         <div className="text-center mb-3">
+          <a
+          className="navbar-brand cursor-pointer"
+          onClick={goToLaunchPage} 
+          style={{ fontSize: '2rem', fontWeight: '700', cursor: 'pointer' }}>
           <h1 className="fw-bold">
             <span style={{ color: "#241A90" }}>Sure</span>
             <span style={{ color: "#3AADA4" }}>Care</span>
           </h1>
+          </a>
         </div>
         <button className="btn btn-outline-primary w-100 mb-2 d-flex align-items-center justify-content-center">
           <img
