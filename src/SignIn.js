@@ -4,13 +4,11 @@ import { useNavigate } from "react-router-dom";
 import googleImage from "./components/google.png";
 
 const SignIn = () => {
-  //const navigate = useNavigate();
   const navigate = useNavigate();
 
   const goToLaunchPage = () => {
     navigate("/"); // Navigate to the LaunchPage
   };
-
 
   return (
     <motion.div 
@@ -19,6 +17,7 @@ const SignIn = () => {
       exit={{ opacity: 0, x: -100 }}
       transition={{ duration: 0.5 }}
       className="d-flex justify-content-center align-items-center vh-100 bg-light"
+      style={{ flexDirection: 'column' }} // Ensure vertical stacking
     >
       <motion.div 
         initial={{ opacity: 0, x: 100 }}
@@ -28,14 +27,15 @@ const SignIn = () => {
         style={{ width: "500px" }}
       >
         <div className="text-center mb-3">
-          <a
-          className="navbar-brand cursor-pointer"
-          onClick={goToLaunchPage} 
-          style={{ fontSize: '2rem', fontWeight: '700', cursor: 'pointer' }}>
-          <h1 className="fw-bold">
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
-          </h1>
+          <a className="navbar-brand" style={{ cursor: 'pointer' }}>
+            <h1
+              className="fw-bold"
+              onClick={goToLaunchPage}
+              style={{ fontSize: '2rem', fontWeight: '700', display: 'inline-block', margin: 0 }}
+            >
+              <span style={{ color: "#241A90" }}>Sure</span>
+              <span style={{ color: "#3AADA4" }}>Care</span>
+            </h1>
           </a>
         </div>
         <button className="btn btn-outline-primary w-100 mb-2 d-flex align-items-center justify-content-center">
@@ -66,9 +66,31 @@ const SignIn = () => {
           <button onClick={() => navigate("/signup")} className="btn btn-outline-dark">Sign Up</button>
         </div>
         <footer className="text-center mt-4 text-muted">
-          &copy; 2025 SureCare. All rights reserved.
+          © 2025 SureCare. All rights reserved.
         </footer>
       </motion.div>
+      {/* Back Button Outside the Card */}
+      <div 
+        style={{ 
+          width: "500px", // Match the card width
+          marginTop: "1rem", // Space between card and button
+          textAlign: "left" // Align button to the left
+        }}
+      >
+        <button 
+          onClick={goToLaunchPage} 
+          className="btn"
+          style={{
+            backgroundColor: "#3AADA4",
+            color: "white",
+            border: "3AADA4",
+            padding: "0.25rem 1rem",
+            fontSize: "1.6rem"
+          }}
+        >
+          &#8678; {/* Unicode for a left arrow */}
+        </button>
+      </div>
     </motion.div>
   );
 };
