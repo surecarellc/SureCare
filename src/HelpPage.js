@@ -1,21 +1,9 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import {useNavigation} from "./utils/goToFunctions.js";
 
 const HelpPage = () => {
-  const navigate = useNavigate();
-
-  const goToLaunchPage = () => {
-    navigate("/");
-  };
-
-  const goToSignIn = () => {
-    navigate("/signin");
-  };
-
-  const goToAboutPage = () => {
-    navigate("/about");
-  };
+  const { goToAboutPage, goToSignInPage, goToLaunchPage } = useNavigation();
 
   return (
     <motion.div
@@ -50,7 +38,7 @@ const HelpPage = () => {
             </button>
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToSignIn}
+              onClick={goToSignInPage}
             >
               Sign In
             </button>

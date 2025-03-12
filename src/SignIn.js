@@ -1,14 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import {useNavigation} from "./utils/goToFunctions.js";
 import googleImage from "./components/google.png";
 
 const SignIn = () => {
-  const navigate = useNavigate();
-
-  const goToLaunchPage = () => {
-    navigate("/"); // Navigate to the LaunchPage
-  };
+  const { goToLaunchPage, goToSignUpPage} = useNavigation();
 
   return (
     <motion.div 
@@ -60,7 +56,7 @@ const SignIn = () => {
           <a href="/" className="text-decoration-none">Forgot password?</a>
         </div>
         <div className="text-center mt-3">
-          <button onClick={() => navigate("/signup")} className="btn btn-outline-dark">Sign Up</button>
+          <button onClick={goToSignUpPage} className="btn btn-outline-dark">Sign Up</button>
         </div>
         <footer className="text-center mt-4 text-muted">
           © 2025 SureCare. All rights reserved.

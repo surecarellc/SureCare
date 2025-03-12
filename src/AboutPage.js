@@ -1,12 +1,11 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import googleImage from "./components/google.png";
 import { useRef } from "react";
-
+import {useNavigation} from "./utils/goToFunctions.js";
 
 const AboutPage = () => {
-  const navigate = useNavigate();
+  const { goToSignInPage, goToHelpPage, goToLaunchPage } = useNavigation();
   
   // Refs for each section to detect when they are in view
   const whoWeAreRef = useRef(null);
@@ -17,10 +16,6 @@ const AboutPage = () => {
   const whoWeAreInView = useInView(whoWeAreRef, { once: false, amount: 0.3 });
   const teamInView = useInView(teamRef, { once: false, amount: 0.3 });
   const missionInView = useInView(missionRef, { once: false, amount: 0.3 });
-
-  const goToLaunchPage = () => navigate("/");
-  const goToSignIn = () => navigate("/signin");
-  const goToHelpPage = () => navigate("/help");
 
   // Animation variants for sections
   const sectionVariants = {
@@ -66,7 +61,7 @@ const AboutPage = () => {
             </button>
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToSignIn}
+              onClick={goToSignInPage}
             >
               Sign In
             </button>

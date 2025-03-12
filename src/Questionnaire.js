@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import {useNavigation} from "./utils/goToFunctions.js";
 import { Button, ButtonGroup, InputGroup, FormControl } from "react-bootstrap";
 
 const Questionnaire = () => {
-  const navigate = useNavigate();
+  const { goToAboutPage, goToSignInPage, goToHelpPage, goToLaunchPage, goToResultsPage} = useNavigation();
 
   // State variables for form fields
   const [careType, setCareType] = useState("");
@@ -16,13 +16,6 @@ const Questionnaire = () => {
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
   const [submitted, setSubmitted] = useState(false);
-
-  // Navigation handlers
-  const goToLaunchPage = () => navigate("/");
-  const goToResults = () => navigate("/results");
-  const goToAboutPage = () => navigate("/about");
-  const goToHelpPage = () => navigate("/help");
-  const goToSignIn = () => navigate("/signin");
 
   // Form validation
   const isFormValid = () => {
@@ -43,9 +36,14 @@ const Questionnaire = () => {
     );
   };
 
+
+
   const handleSubmit = () => {
-    if (isFormValid()) goToResults();
-    else setSubmitted(true);
+    if (isFormValid()){
+      goToResultsPage();
+    } else {
+      setSubmitted(true);
+    }
   };
 
   // Price input handling
@@ -90,7 +88,7 @@ const Questionnaire = () => {
             <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToHelpPage}>
               Help
             </button>
-            <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToSignIn}>
+            <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToSignInPage}>
               Sign In
             </button>
           </div>
