@@ -1,30 +1,10 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import launchImage from "./components/launch_image.png";
+import {useNavigation} from "./utils/goToFunctions.js";
 
 const LaunchPage = () => {
-  const navigate = useNavigate();
-
-  const goToAboutPage = () => {
-    navigate("/about");
-  };
-
-  const goToQuestionnaire = () => {
-    navigate("/questionnaire");
-  };
-
-  const goToSignIn = () => {
-    navigate("/signin");
-  };
-
-  const goToHelpPage = () => {
-    navigate("/help");
-  };
-
-  const goToLaunchPage = () => {
-    navigate("/");
-  };
+  const { goToAboutPage, goToQuestionnairePage, goToSignInPage, goToHelpPage, goToLaunchPage } = useNavigation();
 
   return (
     <motion.div
@@ -59,7 +39,7 @@ const LaunchPage = () => {
             </button>
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToSignIn}
+              onClick={goToSignInPage}
             >
               Sign In
             </button>
@@ -103,7 +83,7 @@ const LaunchPage = () => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           className="btn btn-dark mt-4 px-5 py-2 rounded-pill shadow-sm"
-          onClick={goToQuestionnaire}
+          onClick={goToQuestionnairePage}
         >
           Get Started
         </motion.button>
