@@ -1,18 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import {useNavigation} from "./utils/goToFunctions.js";
 
 const Results = () => {
-  const navigate = useNavigate();
+  const { goToQuestionnairePage, goToLaunchPage } = useNavigation();
 
-  // Navigation functions
-  const goToLaunchPage = () => {
-    navigate("/"); // Navigate back to the LaunchPage
-  };
-
-  const goToQuestionnaire = () => {
-    navigate("/questionnaire"); // Navigate back to the Questionnaire
-  };
 
   // Placeholder data for top 6 healthcare providers
   const dummyResults = [
@@ -111,7 +103,7 @@ const Results = () => {
           <button
             type="button"
             className="btn btn-dark px-4 py-2"
-            onClick={goToQuestionnaire}
+            onClick={goToQuestionnairePage}
             style={{
               backgroundColor: "#343a40",
               border: "none",

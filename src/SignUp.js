@@ -1,18 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import googleImage from "./components/google.png";
-import { useNavigate } from "react-router-dom";
+import {useNavigation} from "./utils/goToFunctions.js";
 
 const SignUp = () => {
-  const navigate = useNavigate();
+  const { goToSignInPage, goToLaunchPage} = useNavigation();
 
-  const goToLaunchPage = () => {
-    navigate("/"); // Navigate to the LaunchPage
-  };
-
-  const goToSignIn = () => {
-    navigate("/SignIn")
-  };
 
   return (
     <motion.div 
@@ -66,7 +59,7 @@ const SignUp = () => {
         </form>
         <div className="text-center mt-3">
           <span>Already have an account? </span>
-          <button onClick = {goToSignIn} style={{cursor: "pointer", background: "none", border: "none", textDecoration: "underline" }} >Sign In</button>
+          <button onClick = {goToSignInPage} style={{cursor: "pointer", background: "none", border: "none", textDecoration: "underline" }} >Sign In</button>
         </div>
         <footer className="text-center mt-4 text-muted">
           © 2025 SureCare. All rights reserved.
