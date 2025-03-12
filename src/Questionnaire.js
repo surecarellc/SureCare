@@ -75,14 +75,14 @@ const Questionnaire = () => {
         style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 1000 }}
       >
         <div className="container-fluid d-flex justify-content-between">
-          <a
-            className="navbar-brand cursor-pointer"
+        <button 
             onClick={goToLaunchPage}
-            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer" }}
+            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
           >
             <span style={{ color: "#241A90" }}>Sure</span>
             <span style={{ color: "#3AADA4" }}>Care</span>
-          </a>
+          </button>
+          
           <div className="d-flex">
             <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToAboutPage}>
               About

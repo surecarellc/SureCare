@@ -43,15 +43,6 @@ const AboutPage = () => {
       >
         <div className="container-fluid d-flex justify-content-between">
           
-          {/*<a 
-            className="navbar-brand cursor-pointer"
-            onClick={goToLaunchPage}
-            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer" }}
-          >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
-          </a>*/}
-          
           <button 
             onClick={goToLaunchPage}
             style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
