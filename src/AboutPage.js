@@ -4,9 +4,10 @@ import { motion, useInView } from "framer-motion";
 import googleImage from "./components/google.png";
 import { useRef } from "react";
 
+
 const AboutPage = () => {
   const navigate = useNavigate();
-
+  
   // Refs for each section to detect when they are in view
   const whoWeAreRef = useRef(null);
   const teamRef = useRef(null);
@@ -41,14 +42,24 @@ const AboutPage = () => {
         style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 1000 }}
       >
         <div className="container-fluid d-flex justify-content-between">
-          <a
+          
+          {/*<a 
             className="navbar-brand cursor-pointer"
             onClick={goToLaunchPage}
             style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer" }}
           >
             <span style={{ color: "#241A90" }}>Sure</span>
             <span style={{ color: "#3AADA4" }}>Care</span>
-          </a>
+          </a>*/}
+          
+          <button 
+            onClick={goToLaunchPage}
+            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
+          >
+            <span style={{ color: "#241A90" }}>Sure</span>
+            <span style={{ color: "#3AADA4" }}>Care</span>
+          </button>
+
           <div className="d-flex">
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"
