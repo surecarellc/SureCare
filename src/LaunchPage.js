@@ -22,6 +22,10 @@ const LaunchPage = () => {
     navigate("/help");
   };
 
+  const goToLaunchPage = () => {
+    navigate("/");
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -100 }}
@@ -33,10 +37,13 @@ const LaunchPage = () => {
       {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div className="container-fluid">
-          <div className="navbar-brand" style={{ fontSize: "2rem", fontWeight: "700" }}>
+        <button 
+            onClick={goToLaunchPage}
+            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
+          >
             <span style={{ color: "#241A90" }}>Sure</span>
             <span style={{ color: "#3AADA4" }}>Care</span>
-          </div>
+          </button>
           <div className="d-flex">
             <button
               className="nav-link text-dark mx-3 bg-transparent border-0"

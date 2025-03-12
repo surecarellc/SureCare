@@ -35,16 +35,13 @@ const Results = () => {
       <div className="row w-100 d-flex justify-content-center align-items-center flex-grow-1 mt-2">
         {/* Title Section */}
         <div className="col-12 d-flex flex-column justify-content-center text-center mb-1">
-          <a
-            className="navbar-brand cursor-pointer"
+        <button 
             onClick={goToLaunchPage}
-            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer" }}
+            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
           >
-            <h1 className="fw-bold" style={{ fontSize: "3rem" }}>
-              <span style={{ color: "#241A90" }}>Sure</span>
-              <span style={{ color: "#3AADA4" }}>Care</span>
-            </h1>
-          </a>
+            <span style={{ color: "#241A90" }}>Sure</span>
+            <span style={{ color: "#3AADA4" }}>Care</span>
+        </button>
           <p className="fs-3" style={{ fontWeight: "300" }}>
             Your Top Healthcare Options
           </p>
