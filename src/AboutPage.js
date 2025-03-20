@@ -8,7 +8,7 @@ const AboutPage = () => {
   const { goToSignInPage, goToHelpPage, goToLaunchPage } = useNavigation();
   
   // Refs for each section to detect when they are in view
-  //test
+  //test aweifiaewj
   const whoWeAreRef = useRef(null);
   const teamRef = useRef(null);
   const missionRef = useRef(null);
