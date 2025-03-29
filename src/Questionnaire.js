@@ -1,45 +1,117 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import {useNavigation} from "./utils/goToFunctions.js";
-import { Button, ButtonGroup, InputGroup, FormControl } from "react-bootstrap";
+import { useNavigation } from "./utils/goToFunctions.js";
+import { Button, ButtonGroup, InputGroup, FormControl, Dropdown, Badge } from "react-bootstrap";
 
 const Questionnaire = () => {
-  const { goToAboutPage, goToSignInPage, goToHelpPage, goToLaunchPage, goToResultsPage} = useNavigation();
+  const { goToAboutPage, goToHelpPage, goToSignInPage, goToLaunchPage, goToResultsPage } = useNavigation();
 
   // State variables for form fields
-  const [careType, setCareType] = useState("");
   const [healthInsurance, setHealthInsurance] = useState(null);
   const [appointmentType, setAppointmentType] = useState(null);
-  const [symptoms, setSymptoms] = useState("");
-  const [location, setLocation] = useState("");
-  const [radius, setRadius] = useState("");
-  const [priceMin, setPriceMin] = useState("");
-  const [priceMax, setPriceMax] = useState("");
+  const [symptoms, setSymptoms] = useState([]);
+  const [inputValue, setInputValue] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [showSymptomsDropdown, setShowSymptomsDropdown] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+
+  // Refs for the input and dropdown
+  const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
+
+  // Custom hook to handle clicks outside multiple refs
+  const useOnClickOutsideMultiple = (refs, handler) => {
+    useEffect(() => {
+      const listener = (event) => {
+        // Check if the click is outside all refs
+        if (refs.every((ref) => !ref.current || !ref.current.contains(event.target))) {
+          handler(event);
+        }
+      };
+      document.addEventListener("mousedown", listener);
+      document.addEventListener("touchstart", listener);
+      return () => {
+        document.removeEventListener("mousedown", listener);
+        document.removeEventListener("touchstart", listener);
+      };
+    }, [refs, handler]);
+  };
+
+  // Use the custom hook to close the dropdown when clicking outside
+  useOnClickOutsideMultiple([inputRef, dropdownRef], () => {
+    setShowSymptomsDropdown(false);
+  });
+
+  // Comprehensive, alphabetically sorted list of symptoms
+  const symptomOptions = [
+    "Abdominal pain", "Acne", "Acute pain", "ADHD", "Adrenal disorders", "Alcoholism",
+    "Allergies", "Alzheimer's disease", "Anemia", "Angina", "Ankle pain", "Anorexia",
+    "Anxiety", "Appendicitis", "Arrhythmia", "Arthritis", "Asthma", "Atherosclerosis",
+    "Autism", "Avoidant personality disorder", "Back pain", "Bacterial vaginosis",
+    "Balance issues", "Basal cell carcinoma", "Binge eating", "Birthmarks", "Bladder infection",
+    "Bleeding", "Bloating", "Blurred vision", "Body dysmorphic disorder", "Borderline personality disorder",
+    "Breast lumps", "Breast pain", "Brief psychotic disorder", "Bronchitis", "Bruising", "Bulimia",
+    "Bunions", "Burning sensation", "Celiac disease", "Chest pain", "Chest tightness", "Chills",
+    "Chronic fatigue syndrome", "Chronic pain", "Cocaine use", "Cold", "Concentration problems",
+    "Conduct disorder", "Confusion", "Constipation", "COPD", "Cough", "COVID-19", "Crohn's disease",
+    "Cyclothymic disorder", "Dandruff", "Deep vein thrombosis", "Delusional disorder", "Dementia",
+    "Dengue fever", "Dependent personality disorder", "Depression", "Diabetes", "Diarrhea", "Diverticulitis",
+    "Dizziness", "Double vision", "Drug addiction", "Dysthymic disorder", "Ear infection", "Ear pain",
+    "Eating disorders", "Eczema", "Elbow pain", "Endometriosis", "Epilepsy", "Erectile dysfunction",
+    "Excoriation disorder", "Eye floaters", "Eye pain", "Facial pain", "Fainting", "Fast heart rate",
+    "Fatigue", "Fever", "Fibroids", "Fibromyalgia", "Flat feet", "Flu", "Food allergies", "Food poisoning",
+    "Foot pain", "Gallstones", "Gambling addiction", "Gas", "Gastritis", "Gastroenteritis", "Gout",
+    "Hair loss", "Hallucinogen use", "Hand pain", "Headache", "Hearing loss", "Heart attack",
+    "Heart failure", "Heartburn", "Heel spurs", "Hemophilia", "Hepatitis", "Hernia", "High arches",
+    "High blood pressure", "High cholesterol", "Hip pain", "Histrionic personality disorder", "Hives",
+    "Hoarding disorder", "Hormonal imbalances", "HIVIAIDS", "Hyperglycemia", "Hypoglycemia", "IBS",
+    "Indigestion", "Infertility", "Ingrown nails", "Inhalant abuse", "Insomnia", "Internet addiction",
+    "Intermittent explosive disorder", "Irregular heartbeat", "Irritability", "Itching", "Jaw pain",
+    "Joint pain", "Kidney infection", "Kidney stones", "Kleptomania", "Knee pain", "Lactose intolerance",
+    "Learning disabilities", "Leukemia", "Low blood pressure", "Low testosterone", "Lupus", "Lyme disease",
+    "Lymphoma", "Malaria", "Marijuana use", "Melanoma", "Memory loss", "Menopause symptoms",
+    "Menstrual irregularities", "Methamphetamine use", "Migraine", "Moles", "Mood swings",
+    "Multiple sclerosis", "Muscle pain", "Myeloma", "Nail fungus", "Narcissistic personality disorder",
+    "Nausea", "Neck pain", "Nerve pain", "Nipple discharge", "Numbness", "Obesity", "OCD",
+    "Opioid addiction", "Oppositional defiant disorder", "Orthorexia", "Osteoarthritis",
+    "Panic attacks", "Paranoid personality disorder", "Parkinson's disease", "Pelvic pain", "Peptic ulcer",
+    "Phobias", "Plantar fasciitis", "Platelet disorders", "PMS", "Pneumonia", "Polycystic ovary syndrome",
+    "Postpartum psychosis", "Prescription drug abuse", "Prostate issues", "Psoriasis", "PTSD",
+    "Pyromania", "Rash", "Rheumatoid arthritis", "Rosacea", "Scalp itch", "Scars", "Schizoaffective disorder",
+    "Schizoid personality disorder", "Schizophrenia", "Schizotypal personality disorder", "Seizures",
+    "Sexually transmitted infections", "Shared psychotic disorder", "Shortness of breath", "Shoulder pain",
+    "Sickle cell disease", "Sinusitis", "Skin cancer", "Sleep disorders", "Slow heart rate", "Smoking",
+    "Sore throat", "Speech problems", "Squamous cell carcinoma", "Strep throat", "Stress", "Stroke",
+    "Stretch marks", "Substance abuse", "Swelling", "Testicular pain", "Throat pain", "Thyroid disorders",
+    "Tingling", "Tinnitus", "Tonsillitis", "Tooth pain", "Tremors", "Trichotillomania", "Tuberculosis",
+    "Ulcerative colitis", "Underweight", "Urinary tract infection", "Vaping", "Varicose veins",
+    "Vertigo", "Video game addiction", "Vision problems", "Vomiting", "Warts", "Weakness",
+    "Wheezing", "Workaholism", "Wrist pain", "Yeast infection", "Zika virus"
+  ];
 
   // Form validation
   const isFormValid = () => {
-    // Price range is valid if both are empty OR both are filled and min < max
     const isPriceRangeValid =
       (priceMin === "" && priceMax === "") ||
       (priceMin !== "" && priceMax !== "" && parseFloat(priceMin) < parseFloat(priceMax));
 
-    // Check all other required fields and the price range condition
     return (
-      careType !== "" &&
       healthInsurance !== null &&
       appointmentType !== null &&
-      symptoms !== "" &&
+      symptoms.length > 0 &&
       location.trim() !== "" &&
       radius !== "" &&
       isPriceRangeValid
     );
   };
 
-
+  const [location, setLocation] = useState("");
+  const [radius, setRadius] = useState("");
+  const [priceMin, setPriceMin] = useState("");
+  const [priceMax, setPriceMax] = useState("");
 
   const handleSubmit = () => {
-    if (isFormValid()){
+    if (isFormValid()) {
       goToResultsPage();
     } else {
       setSubmitted(true);
@@ -60,6 +132,65 @@ const Questionnaire = () => {
     if (!allowedKeys.includes(e.key)) e.preventDefault();
   };
 
+  // Handle input change and dropdown visibility
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInputValue(value);
+    setHighlightedIndex(-1);
+    setShowSymptomsDropdown(true);
+  };
+
+  // Filter symptoms, excluding already selected ones
+  const filteredSymptoms = symptomOptions
+    .filter((symptom) => !symptoms.includes(symptom))
+    .filter((symptom) => symptom.toLowerCase().includes(inputValue.toLowerCase()));
+
+  // Handle symptom selection
+  const handleSymptomSelect = (symptom) => {
+    setSymptoms([...symptoms, symptom]);
+    setInputValue("");
+    setHighlightedIndex(-1);
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 0);
+  };
+
+  // Remove a symptom
+  const handleRemoveSymptom = (symptomToRemove) => {
+    setSymptoms(symptoms.filter((symptom) => symptom !== symptomToRemove));
+  };
+
+  // Handle keyboard navigation for symptoms
+  const handleKeyDownSymptoms = (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (filteredSymptoms.length > 0) {
+        setShowSymptomsDropdown(true);
+        setHighlightedIndex((prev) =>
+          prev < filteredSymptoms.length - 1 ? prev + 1 : prev
+        );
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (filteredSymptoms.length > 0) {
+        setShowSymptomsDropdown(true);
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+      }
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightedIndex >= 0) {
+        handleSymptomSelect(filteredSymptoms[highlightedIndex]);
+      } else if (inputValue !== "" && filteredSymptoms.length > 0) {
+        handleSymptomSelect(filteredSymptoms[0]);
+      }
+    } else if (e.key === "Escape") {
+      setShowSymptomsDropdown(false);
+      setHighlightedIndex(-1);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -73,14 +204,13 @@ const Questionnaire = () => {
         style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 1000 }}
       >
         <div className="container-fluid d-flex justify-content-between">
-        <button 
+          <button
             onClick={goToLaunchPage}
             style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
           >
             <span style={{ color: "#241A90" }}>Sure</span>
             <span style={{ color: "#3AADA4" }}>Care</span>
           </button>
-          
           <div className="d-flex">
             <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToAboutPage}>
               About
@@ -123,27 +253,77 @@ const Questionnaire = () => {
                 style={{ overflowY: "auto", flex: 1 }}
               >
                 <form className="d-flex flex-column">
-                  {/* Type of Care */}
+                  {/* Symptoms */}
                   <div className="mb-5 row align-items-center position-relative">
                     <label className="col-form-label col-sm-4" style={{ fontWeight: 700 }}>
-                      What type of care are you seeking?
+                      Select your symptoms
                     </label>
                     <div className="col-sm-8 position-relative">
-                      <select
-                        className={`form-select ${submitted && careType === "" ? "is-invalid" : ""}`}
-                        value={careType}
-                        onChange={(e) => setCareType(e.target.value)}
+                      <div
+                        className={`form-control d-flex flex-wrap align-items-center p-2 ${
+                          submitted && symptoms.length === 0 ? "is-invalid" : ""
+                        }`}
+                        style={{ minHeight: "38px" }}
                       >
-                        <option value="">Click to see options</option>
-                        <option value="primary">Primary Care</option>
-                        <option value="specialist">Specialist</option>
-                      </select>
-                      {submitted && careType === "" && (
+                        {symptoms.map((symptom, index) => (
+                          <Badge
+                            key={index}
+                            pill
+                            bg="secondary"
+                            className="d-flex align-items-center me-2 mb-1"
+                          >
+                            {symptom}
+                            <span
+                              className="ms-2"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => handleRemoveSymptom(symptom)}
+                            >
+                              ×
+                            </span>
+                          </Badge>
+                        ))}
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={inputValue}
+                          onChange={handleInputChange}
+                          onFocus={() => setShowSymptomsDropdown(true)}
+                          onKeyDown={handleKeyDownSymptoms}
+                          placeholder={symptoms.length === 0 ? "Type your symptoms..." : ""}
+                          style={{
+                            border: "none",
+                            outline: "none",
+                            flex: 1,
+                            minWidth: "100px",
+                            background: "transparent",
+                          }}
+                        />
+                      </div>
+                      {showSymptomsDropdown && filteredSymptoms.length > 0 && (
+                        <div ref={dropdownRef}>
+                          <Dropdown.Menu
+                            show
+                            className="w-100"
+                            style={{ maxHeight: "200px", overflowY: "auto" }}
+                          >
+                            {filteredSymptoms.map((symptom, index) => (
+                              <Dropdown.Item
+                                key={index}
+                                onClick={() => handleSymptomSelect(symptom)}
+                                active={index === highlightedIndex}
+                              >
+                                {symptom}
+                              </Dropdown.Item>
+                            ))}
+                          </Dropdown.Menu>
+                        </div>
+                      )}
+                      {submitted && symptoms.length === 0 && (
                         <div
                           className="invalid-feedback d-block position-absolute"
                           style={{ bottom: "-1.5em", left: 0, width: "100%", color: "red" }}
                         >
-                          Please select a care type.
+                          Please select at least one symptom.
                         </div>
                       )}
                     </div>
@@ -263,32 +443,6 @@ const Questionnaire = () => {
                           style={{ bottom: "-1.5em", left: 0, width: "100%" }}
                         >
                           Please select an option.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Symptoms */}
-                  <div className="mb-5 row align-items-center position-relative">
-                    <label className="col-form-label col-sm-4" style={{ fontWeight: 700 }}>
-                      Select your symptoms
-                    </label>
-                    <div className="col-sm-8 position-relative">
-                      <select
-                        className={`form-select ${submitted && symptoms === "" ? "is-invalid" : ""}`}
-                        value={symptoms}
-                        onChange={(e) => setSymptoms(e.target.value)}
-                      >
-                        <option value="">Click to see options</option>
-                        <option value="fever">Fever</option>
-                        <option value="cough">Cough</option>
-                      </select>
-                      {submitted && symptoms === "" && (
-                        <div
-                          className="invalid-feedback d-block position-absolute"
-                          style={{ bottom: "-1.5em", left: 0, width: "100%", color: "red" }}
-                        >
-                          Please select your symptoms.
                         </div>
                       )}
                     </div>
