@@ -18,6 +18,6 @@ export async function getUserById(name, age) {
           age: age
         })
       });
-  const data = await res.json();
+  const data = await res.text();
   return createLocationFromApi(data);
 }
