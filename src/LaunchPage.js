@@ -2,10 +2,11 @@ import React from "react";
 import { motion } from "framer-motion";
 import launchImage from "./components/launch_image.png";
 import {useNavigation} from "./utils/goToFunctions.js";
+import { getUserById } from "../services/userService.js";
 
 const LaunchPage = () => {
   const { goToAboutPage, goToQuestionnairePage, goToSignInPage, goToHelpPage, goToLaunchPage } = useNavigation();
-
+  getUserById("vik", 19);
   return (
     <motion.div
       initial={{ opacity: 0, x: -100 }}
