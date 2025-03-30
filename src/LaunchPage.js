@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import launchImage from "./components/launch_image.png";
 import {useNavigation} from "./utils/goToFunctions.js";
-import { getUserById } from "../services/userService.js";
+import { getUserById } from "./services/userService.js";
 
 const LaunchPage = () => {
   const { goToAboutPage, goToQuestionnairePage, goToSignInPage, goToHelpPage, goToLaunchPage } = useNavigation();
