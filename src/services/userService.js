@@ -7,7 +7,7 @@ function createLocationFromApi(data) {
 }
 
 // Get user by inputs
-export async function getUserById(name, age) {
+export async function getLocationPrices(name, age) {
     const res = await fetch(`https://SureCareAPI.azurewebsites.net/api/HttpTriggerCSharp?code=y6Z7N9c12KFZf1bZKu50yoGjuO13WSVBrmBahITtDRtoAzFuLQqxSA==`, {
         method: "POST",
         headers: {
