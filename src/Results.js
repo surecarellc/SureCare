@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {useNavigation} from "./utils/goToFunctions.js";
 
 const Results = () => {
-  const { goToQuestionnairePage, goToLaunchPage } = useNavigation();
+  const { goToQuestionnairePage, goToLaunchPage, goToAboutPage, goToHelpPage, goToSignInPage } = useNavigation();
 
 
   // Placeholder data for top 6 healthcare providers
@@ -24,23 +24,50 @@ const Results = () => {
       className="container d-flex flex-column min-vh-100 justify-content-start align-items-center text-center"
       style={{ paddingBottom: "80px"}} // Added paddingTop for upward shift
     >
-      <div className="row w-100 d-flex justify-content-center align-items-center flex-grow-1 mt-2">
-        {/* Title Section */}
-        <div className="col-12 d-flex flex-column justify-content-center text-center mb-1">
+
+<nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom border-dark px-0" 
+     style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 1000 }}>
+        <div className="container-fluid d-flex justify-content-between">
         <button 
             onClick={goToLaunchPage}
             style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
           >
             <span style={{ color: "#241A90" }}>Sure</span>
             <span style={{ color: "#3AADA4" }}>Care</span>
-        </button>
-          <p className="fs-3" style={{ fontWeight: "300" }}>
+          </button>
+          <div className="d-flex">
+            <button
+              className="nav-link text-dark mx-3 bg-transparent border-0"
+              onClick={goToAboutPage}
+            >
+              About
+            </button>
+            <button
+              className="nav-link text-dark mx-3 bg-transparent border-0"
+              onClick={goToHelpPage}
+            >
+              Help
+            </button>
+            <button
+              className="nav-link text-dark mx-3 bg-transparent border-0"
+              onClick={goToSignInPage}
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="row w-100 d-flex justify-content-center align-items-center flex-grow-1 mt-5">
+        {/* Title Section */}
+        <div className="col-12 d-flex flex-column justify-content-center text-center mt-5">
+          <p className="fs-1" style={{ fontWeight: "300" }}>
             Your Top Healthcare Options
           </p>
         </div>
 
         {/* Main Content: Map and Results */}
-        <div className="col-12 d-flex flex-column flex-md-row justify-content-center">
+        <div className="col-12 d-flex flex-column flex-md-row justify-content-center mb-5">
           {/* Map Section */}
           <div className="col-md-5 mb-4 mb-md-0">
             <div
