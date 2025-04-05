@@ -7,6 +7,7 @@ import {useNavigation} from "./utils/goToFunctions.js";
 const LaunchPage = () => {
   const { goToAboutPage, goToQuestionnairePage, goToSignInPage, goToHelpPage, goToLaunchPage } = useNavigation();
   //getLocationPrices("vik", 19);
+  //test comment
   return (
     <motion.div
       initial={{ opacity: 0, x: -100 }}
