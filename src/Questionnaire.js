@@ -111,12 +111,38 @@ const Questionnaire = () => {
   const [priceMax, setPriceMax] = useState("");
 
   const handleSubmit = () => {
-    if (isFormValid()) {
-      goToResultsPage();
-    } else {
+    if (!navigator.geolocation) {
+      console.error("Geolocation is not supported by this browser.");
       setSubmitted(true);
+      return;
     }
+  
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        console.log("Latitude:", latitude);
+        console.log("Longitude:", longitude);
+  
+        // Optionally, you could store these in state if needed:
+        // setUserLocation({ latitude, longitude });
+  
+        if (isFormValid()) {
+          goToResultsPage();
+        } else {
+          setSubmitted(true);
+        }
+      },
+      (error) => {
+        console.error("Error getting location:", error.message);
+        setSubmitted(true); // Optionally still mark form as submitted even if location fails
+      }
+    );
   };
+
+  // azure function, params = lat, long, radius, cpt
+  // function gets a list of the hospitals surrounding the coords
+  // returns the list of hospitals
 
   // Price input handling
   const handlePriceInput = (value, setter) => {
@@ -586,6 +612,8 @@ const Questionnaire = () => {
                       }}
                       onMouseOver={(e) => (e.target.style.backgroundColor = "#6c757d")}
                       onMouseOut={(e) => (e.target.style.backgroundColor = "#343a40")}
+                      //list = azureFunctionCall
+                      //pass the list to the next page
                       onClick={handleSubmit}
                     >
                       Submit
