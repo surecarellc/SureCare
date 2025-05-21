@@ -32,8 +32,8 @@ const Results = () => {
             onClick={goToLaunchPage}
             style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
           >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
+            <span style={{ color: "#241A90" }}>True</span>
+            <span style={{ color: "#3AADA4" }}>Rate</span>
           </button>
           <div className="d-flex">
             <button
@@ -156,7 +156,7 @@ const Results = () => {
           width: "100vw",
         }}
       >
-        © 2025 SureCare. All rights reserved.
+        © 2025 TrueRate. All rights reserved.
       </footer>
     </motion.div>
   );

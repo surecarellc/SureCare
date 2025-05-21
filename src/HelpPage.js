@@ -21,8 +21,8 @@ const HelpPage = () => {
             onClick={goToLaunchPage}
             style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
           >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
+            <span style={{ color: "#241A90" }}>True</span>
+            <span style={{ color: "#3AADA4" }}>Rate</span>
           </button>
           <div className="d-flex">
             <button 
@@ -75,7 +75,7 @@ const HelpPage = () => {
       {/* Footer */}
       <footer className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark px-0"
         style={{ position: "fixed", bottom: 0, left: 0, right: 0, width: "100vw" }}>
-        &copy; 2025 SureCare. All rights reserved.
+        &copy; 2025 TrueRate. All rights reserved.
       </footer>
     </motion.div>
   );
