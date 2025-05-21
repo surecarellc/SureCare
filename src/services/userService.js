@@ -2,9 +2,11 @@
 import { location } from "../models/location.js";
 
 // Converts raw JSON into the correct User object type
+/*
 function createLocationFromApi(data) {
     return new location(data.id, data.name);
 }
+*/
 
 //get data
 export async function getLocationPrices(lat, lng, radius) {
