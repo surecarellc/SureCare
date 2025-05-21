@@ -1,13 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import launchImage from "./components/launch_image.png";
-import {useNavigation} from "./utils/goToFunctions.js";
-//import { getLocationPrices } from "./services/userService.js";
+import { useNavigation } from "./utils/goToFunctions.js";
+import { getLocationPrices } from "./services/userService.js";
 
 const LaunchPage = () => {
-  const { goToAboutPage, goToQuestionnairePage, goToSignInPage, goToHelpPage, goToLaunchPage } = useNavigation();
-  //getLocationPrices("vik", 19);
-  //test comment
+  const [hospitalData, setHospitalData] = useState([]); // <-- Step 1: declare state
+
+  const {
+    goToAboutPage,
+    goToQuestionnairePage,
+    goToSignInPage,
+    goToHelpPage,
+    goToLaunchPage,
+  } = useNavigation();
+
+  // Step 2: fetch data on load
+  useEffect(() => {
+    console.log("🔥 Console works test"); // ← Test log
+
+    getLocationPrices(1, 1, 19)
+      .then((data) => {
+        console.log("🏥 Hospital data from API:", data); // ← Actual API result
+        setHospitalData(data);
+      })
+      .catch((err) => {
+        console.error("❌ Failed to fetch hospital data:", err);
+      });
+  }, []);
+
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -100 }}
@@ -19,9 +41,15 @@ const LaunchPage = () => {
       {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div className="container-fluid">
-        <button 
+          <button
             onClick={goToLaunchPage}
-            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
+            style={{
+              fontSize: "2rem",
+              fontWeight: "700",
+              cursor: "pointer",
+              background: "none",
+              border: "none",
+            }}
           >
             <span style={{ color: "#241A90" }}>Sure</span>
             <span style={{ color: "#3AADA4" }}>Care</span>
@@ -78,7 +106,10 @@ const LaunchPage = () => {
             zIndex: -1,
           }}
         />
-        <h1 className="display-4" style={{ fontWeight: '400', fontFamily: 'Outfit, sans-serif' }}>
+        <h1
+          className="display-4"
+          style={{ fontWeight: "400", fontFamily: "Outfit, sans-serif" }}
+        >
           Find the right <br /> healthcare for you.
         </h1>
         <motion.button
@@ -89,6 +120,12 @@ const LaunchPage = () => {
         >
           Get Started
         </motion.button>
+
+        {/* Step 3: Display hospital data */}
+        <div className="mt-4 bg-light p-3 rounded" style={{ maxHeight: "200px", overflowY: "scroll", width: "100%" }}>
+          <h5>Hospital Data:</h5>
+          <pre>{JSON.stringify(hospitalData, null, 2)}</pre>
+        </div>
       </motion.div>
 
       {/* Footer */}
