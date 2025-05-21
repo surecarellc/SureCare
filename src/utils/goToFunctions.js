@@ -9,7 +9,7 @@ export const useNavigation = () => {
         goToSignInPage: () => navigate("/signin"),
         goToHelpPage: () => navigate("/help"),
         goToLaunchPage: () => navigate("/"),
-        goToResultsPage: () => navigate("/results"),
+        goToResultsPage: (state) => navigate("/results", { state }),
         goToSignUpPage: () => navigate("/signup")
     };
 };

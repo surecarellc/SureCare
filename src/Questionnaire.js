@@ -71,7 +71,7 @@ const Questionnaire = () => {
 
       console.log("📍 Coords:", coords);
       const { latitude, longitude } = coords;
-      const searchRadius = radius || 19;
+      const searchRadius = radius || 5;
 
       const hospitals = await getLocationPrices(latitude, longitude, searchRadius);
       console.log("🏥 API response (hospitals):", hospitals);
