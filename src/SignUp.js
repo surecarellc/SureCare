@@ -28,8 +28,8 @@ const SignUp = () => {
             onClick={goToLaunchPage}
             style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
           >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
+            <span style={{ color: "#241A90" }}>True</span>
+            <span style={{ color: "#3AADA4" }}>Rate</span>
           </button>
         </div>
         <button className="btn btn-outline-primary w-100 mb-2 d-flex align-items-center justify-content-center">
@@ -62,7 +62,7 @@ const SignUp = () => {
           <button onClick = {goToSignInPage} style={{cursor: "pointer", background: "none", border: "none", textDecoration: "underline" }} >Sign In</button>
         </div>
         <footer className="text-center mt-4 text-muted">
-          © 2025 SureCare. All rights reserved.
+          © 2025 TrueRate. All rights reserved.
         </footer>
       </motion.div>
       

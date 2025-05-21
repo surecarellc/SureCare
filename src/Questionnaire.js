@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigation } from "./utils/goToFunctions.js";
 import { Button, ButtonGroup, InputGroup, FormControl, Dropdown, Badge } from "react-bootstrap";
+import { FaArrowRight } from "react-icons/fa";
 
 const Questionnaire = () => {
   const { goToAboutPage, goToHelpPage, goToSignInPage, goToLaunchPage, goToResultsPage } = useNavigation();
@@ -11,9 +12,11 @@ const Questionnaire = () => {
   const [appointmentType, setAppointmentType] = useState(null);
   const [symptoms, setSymptoms] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [showSymptomsDropdown, setShowSymptomsDropdown] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [details, setDetails] = useState("");
+  const [submitted, setSubmitted] = useState(false); // if you're validating
+
 
   // Refs for the input and dropdown
   const inputRef = useRef(null);
@@ -234,8 +237,8 @@ const Questionnaire = () => {
             onClick={goToLaunchPage}
             style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
           >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
+            <span style={{ color: "#241A90" }}>True</span>
+            <span style={{ color: "#3AADA4" }}>Rate</span>
           </button>
           <div className="d-flex">
             <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToAboutPage}>
@@ -278,353 +281,62 @@ const Questionnaire = () => {
                 className="card-body p-4 d-flex flex-column"
                 style={{ overflowY: "auto", flex: 1 }}
               >
-                <form className="d-flex flex-column">
-                  {/* Symptoms */}
-                  <div className="mb-5 row align-items-center position-relative">
-                    <label className="col-form-label col-sm-4" style={{ fontWeight: 700 }}>
-                      Select your symptoms
-                    </label>
-                    <div className="col-sm-8 position-relative">
-                      <div
-                        className={`form-control d-flex flex-wrap align-items-center p-2 ${
-                          submitted && symptoms.length === 0 ? "is-invalid" : ""
-                        }`}
-                        style={{ minHeight: "38px" }}
-                      >
-                        {symptoms.map((symptom, index) => (
-                          <Badge
-                            key={index}
-                            pill
-                            bg="secondary"
-                            className="d-flex align-items-center me-2 mb-1"
-                          >
-                            {symptom}
-                            <span
-                              className="ms-2"
-                              style={{ cursor: "pointer" }}
-                              onClick={() => handleRemoveSymptom(symptom)}
-                            >
-                              ×
-                            </span>
-                          </Badge>
-                        ))}
-                        <input
-                          ref={inputRef}
-                          type="text"
-                          value={inputValue}
-                          onChange={handleInputChange}
-                          onFocus={() => setShowSymptomsDropdown(true)}
-                          onKeyDown={handleKeyDownSymptoms}
-                          placeholder={symptoms.length === 0 ? "Type your symptoms..." : ""}
-                          style={{
-                            border: "none",
-                            outline: "none",
-                            flex: 1,
-                            minWidth: "100px",
-                            background: "transparent",
-                          }}
-                        />
-                      </div>
-                      {showSymptomsDropdown && filteredSymptoms.length > 0 && (
-                        <div ref={dropdownRef}>
-                          <Dropdown.Menu
-                            show
-                            className="w-100"
-                            style={{ maxHeight: "200px", overflowY: "auto" }}
-                          >
-                            {filteredSymptoms.map((symptom, index) => (
-                              <Dropdown.Item
-                                key={index}
-                                onClick={() => handleSymptomSelect(symptom)}
-                                active={index === highlightedIndex}
-                              >
-                                {symptom}
-                              </Dropdown.Item>
-                            ))}
-                          </Dropdown.Menu>
-                        </div>
-                      )}
-                      {submitted && symptoms.length === 0 && (
-                        <div
-                          className="invalid-feedback d-block position-absolute"
-                          style={{ bottom: "-1.5em", left: 0, width: "100%", color: "red" }}
-                        >
-                          Please select at least one symptom.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Health Insurance */}
-                  <div className="mb-5 row align-items-center position-relative">
-                    <label className="col-form-label col-sm-4" style={{ fontWeight: 700 }}>
-                      Do you have health insurance?
-                    </label>
-                    <div className="col-sm-8 position-relative">
-                      <ButtonGroup className="d-flex justify-content-start" style={{ gap: "20px" }}>
-                        <Button
-                          className="fw-bold"
-                          style={{
-                            width: "120px",
-                            padding: "10px 20px",
-                            backgroundColor: healthInsurance === "Yes" ? "#241A90" : "transparent",
-                            color: healthInsurance === "Yes" ? "#fff" : "#241A90",
-                            border: "2px solid #241A90",
-                            borderRadius: "25px",
-                            transition: "all 0.3s ease-in-out",
-                          }}
-                          onClick={() => setHealthInsurance(healthInsurance === "Yes" ? null : "Yes")}
-                        >
-                          Yes
-                        </Button>
-                        <Button
-                          className="fw-bold"
-                          style={{
-                            width: "120px",
-                            padding: "10px 20px",
-                            backgroundColor: healthInsurance === "No" ? "#3AADA4" : "transparent",
-                            color: healthInsurance === "No" ? "#fff" : "#3AADA4",
-                            border: "2px solid #3AADA4",
-                            borderRadius: "25px",
-                            transition: "all 0.3s ease-in-out",
-                          }}
-                          onClick={() => setHealthInsurance(healthInsurance === "No" ? null : "No")}
-                        >
-                          No
-                        </Button>
-                      </ButtonGroup>
-                      {submitted && healthInsurance === null && (
-                        <div
-                          className="text-danger position-absolute"
-                          style={{ bottom: "-1.5em", left: 0, width: "100%" }}
-                        >
-                          Please select an option.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Appointment Type */}
-                  <div className="mb-5 row align-items-center position-relative">
-                    <label className="col-form-label col-sm-4" style={{ fontWeight: 700 }}>
-                      Do you prefer in-person or virtual appointment?
-                    </label>
-                    <div className="col-sm-8 position-relative">
-                      <ButtonGroup className="d-flex justify-content-start" style={{ gap: "20px" }}>
-                        <Button
-                          className="fw-bold"
-                          style={{
-                            width: "80px",
-                            padding: "10px 10px",
-                            backgroundColor: appointmentType === "In-person" ? "#241A90" : "transparent",
-                            color: appointmentType === "In-person" ? "#fff" : "#241A90",
-                            border: "2px solid #241A90",
-                            borderRadius: "25px",
-                            transition: "all 0.3s ease-in-out",
-                          }}
-                          onClick={() =>
-                            setAppointmentType(appointmentType === "In-person" ? null : "In-person")
-                          }
-                        >
-                          In-Person
-                        </Button>
-                        <Button
-                          className="fw-bold"
-                          style={{
-                            width: "80px",
-                            padding: "10px 10px",
-                            backgroundColor: appointmentType === "Virtual" ? "#3AADA4" : "transparent",
-                            color: appointmentType === "Virtual" ? "#fff" : "#3AADA4",
-                            border: "2px solid #3AADA4",
-                            borderRadius: "25px",
-                            transition: "all 0.3s ease-in-out",
-                          }}
-                          onClick={() =>
-                            setAppointmentType(appointmentType === "Virtual" ? null : "Virtual")
-                          }
-                        >
-                          Virtual
-                        </Button>
-                        <Button
-                          className="fw-bold"
-                          style={{
-                            width: "80px",
-                            padding: "10px 10px",
-                            backgroundColor: appointmentType === "Both" ? "#6c757d" : "transparent",
-                            color: appointmentType === "Both" ? "#fff" : "#6c757d",
-                            border: "2px solid #6c757d",
-                            borderRadius: "25px",
-                            transition: "all 0.3s ease-in-out",
-                          }}
-                          onClick={() =>
-                            setAppointmentType(appointmentType === "Both" ? null : "Both")
-                          }
-                        >
-                          No Preference
-                        </Button>
-                      </ButtonGroup>
-                      {submitted && appointmentType === null && (
-                        <div
-                          className="text-danger position-absolute"
-                          style={{ bottom: "-1.5em", left: 0, width: "100%" }}
-                        >
-                          Please select an option.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Preferred Location and Radius */}
-                  <div className="mb-5 row align-items-center position-relative">
-                    <label className="col-form-label col-sm-4" style={{ fontWeight: 700 }}>
-                      What is your preferred location?
-                    </label>
-                    <div className="col-sm-5 position-relative">
-                      <input
-                        type="text"
-                        className={`form-control ${submitted && location.trim() === "" ? "is-invalid" : ""}`}
-                        placeholder="Enter your address"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                      />
-                      {submitted && location.trim() === "" && (
-                        <div
-                          className="invalid-feedback d-block position-absolute"
-                          style={{ bottom: "-1.5em", left: 0, width: "100%", color: "red" }}
-                        >
-                          Please enter your location.
-                        </div>
-                      )}
-                    </div>
-                    <div className="col-sm-3 position-relative">
-                      <InputGroup>
-                        <FormControl
-                          as="select"
-                          value={radius}
-                          onChange={(e) => setRadius(e.target.value)}
-                          className={submitted && radius === "" ? "is-invalid" : ""}
-                          style={{
-                            borderRight: "none",
-                            appearance: "auto",
-                            paddingRight: "1.5rem"
-                          }}
-                        >
-                          <option value="">Radius</option>
-                          <option value="10">10</option>
-                          <option value="15">15</option>
-                          <option value="25">25</option>
-                          <option value="50">50</option>
-                          <option value="100">100</option>
-                        </FormControl>
-                        <InputGroup.Text style={{ backgroundColor: "#fff", borderLeft: "none" }}>
-                          mi
-                        </InputGroup.Text>
-                      </InputGroup>
-                      {submitted && radius === "" && (
-                        <div
-                          className="invalid-feedback d-block position-absolute"
-                          style={{ bottom: "-1.5em", left: 0, width: "100%", color: "red" }}
-                        >
-                          Please select your radius.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Desired Price Range */}
-                  <div className="mb-5 row align-items-center position-relative">
-                    <label className="col-form-label col-sm-4" style={{ fontWeight: 700 }}>
-                      Desired Price Range
-                    </label>
-                    <div className="col-sm-4 position-relative">
-                      <InputGroup>
-                        <InputGroup.Text style={{ backgroundColor: "#fff", borderRight: "none" }}>
-                          $
-                        </InputGroup.Text>
-                        <FormControl
-                          type="number"
-                          placeholder="Min"
-                          style={{ borderLeft: "none" }}
-                          value={priceMin}
-                          onChange={(e) => handlePriceInput(e.target.value, setPriceMin)}
-                          onKeyDown={handleKeyDown}
-                          min="0"
-                          step="1"
-                          className={
-                            submitted &&
-                            priceMin !== "" &&
-                            priceMax !== "" &&
-                            parseFloat(priceMin) >= parseFloat(priceMax)
-                              ? "is-invalid"
-                              : ""
-                          }
-                        />
-                      </InputGroup>
-                      {submitted &&
-                        priceMin !== "" &&
-                        priceMax !== "" &&
-                        parseFloat(priceMin) >= parseFloat(priceMax) && (
-                          <div
-                            className="invalid-feedback d-block position-absolute"
-                            style={{ bottom: "-1.5em", left: 0, width: "100%", color: "red" }}
-                          >
-                            Min must be less than max.
-                          </div>
-                        )}
-                    </div>
-                    <div className="col-sm-4 position-relative">
-                      <InputGroup>
-                        <InputGroup.Text style={{ backgroundColor: "#fff", borderRight: "none" }}>
-                          $
-                        </InputGroup.Text>
-                        <FormControl
-                          type="number"
-                          placeholder="Max"
-                          style={{ borderLeft: "none" }}
-                          value={priceMax}
-                          onChange={(e) => handlePriceInput(e.target.value, setPriceMax)}
-                          onKeyDown={handleKeyDown}
-                          min="0"
-                          step="1"
-                          className={
-                            submitted &&
-                            priceMin !== "" &&
-                            priceMax !== "" &&
-                            parseFloat(priceMin) >= parseFloat(priceMax)
-                              ? "is-invalid"
-                              : ""
-                          }
-                        />
-                      </InputGroup>
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="mt-1 d-flex justify-content-center">
-                    <button
-                      type="button"
-                      className="btn btn-dark px-4 py-2"
+                <form onSubmit={handleSubmit} className="d-flex flex-column">
+                  <div
+                    className="d-flex align-items-center border rounded px-3 py-2"
+                    style={{
+                      backgroundColor: "#f8f9fa",
+                      borderColor: submitted && details.trim() === "" ? "red" : "#ced4da",
+                    }}
+                  >
+                    <textarea
+                      id="details"
+                      className="form-control border-0"
+                      rows={1}
+                      placeholder="Type your symptoms or preferences..."
                       style={{
-                        backgroundColor: "#343a40",
-                        border: "none",
-                        borderRadius: "30px",
-                        transition: "background-color 0.3s ease",
+                        resize: "none",
+                        boxShadow: "none",
+                        backgroundColor: "transparent",
+                        fontSize: "1rem",
+                        overflow: "hidden",
                       }}
-                      onMouseOver={(e) => (e.target.style.backgroundColor = "#6c757d")}
-                      onMouseOut={(e) => (e.target.style.backgroundColor = "#343a40")}
-                      //list = azureFunctionCall
-                      //pass the list to the next page
-                      onClick={handleSubmit}
+                      value={details}
+                      onChange={(e) => setDetails(e.target.value)}
+                    />
+                    <button
+                      type="submit"
+                      className="btn p-2"
+                      style={{
+                        backgroundColor: "#241A90",
+                        color: "#fff",
+                        borderRadius: "50%",
+                        width: "40px",
+                        height: "40px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginLeft: "10px",
+                        transition: "background-color 0.2s ease-in-out",
+                      }}
+                      onMouseOver={(e) => (e.target.style.backgroundColor = "#3b2dbb")}
+                      onMouseOut={(e) => (e.target.style.backgroundColor = "#241A90")}
                     >
-                      Submit
+                      <FaArrowRight />
                     </button>
                   </div>
+
+                  {submitted && details.trim() === "" && (
+                    <div className="text-danger mt-2">
+                      Please provide some information before proceeding.
+                    </div>
+                  )}
                 </form>
               </div>
             </div>
           </div>
         </div>
-      </div>
+        </div>
 
       {/* Footer */}
       <motion.footer
@@ -634,7 +346,7 @@ const Questionnaire = () => {
         className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark"
         style={{ position: "relative", bottom: 0, left: 0, right: 0, width: "100vw" }}
       >
-        © 2025 SureCare. All rights reserved.
+        © 2025 TrueRate. All rights reserved.
       </motion.footer>
     </motion.div>
   );
