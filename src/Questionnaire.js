@@ -15,28 +15,33 @@ const Questionnaire = () => {
     goToResultsPage,
   } = useNavigation();
 
-  /* ─────────── State (only what’s used) ─────────── */
-  // eslint-disable-next-line no-unused-vars
-  const [, setShowSymptomsDropdown] = useState(false); // only setter used
-
+  /* ─────────── State ─────────── */
+  const [, setShowSymptomsDropdown] = useState(false);
   const [details, setDetails] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  // We read radius (default 5) but never mutate it yet,
-  // so bind only the value to satisfy ESLint.
-  const [radius] = useState("");
+  // location state
+  const [coords, setCoords] = useState({ lat: null, lng: null });
+  const [geoError, setGeoError] = useState(null);
 
-  /* ─── Commented-out placeholders you’ll implement later ─── */
-  /*
-  const [healthInsurance, setHealthInsurance] = useState(null);
-  const [appointmentType, setAppointmentType] = useState(null);
-  const [symptoms, setSymptoms] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [location, setLocation] = useState("");
-  const [priceMin, setPriceMin] = useState("");
-  const [priceMax, setPriceMax] = useState("");
-  */
+  const radiusMiles = 5;
+
+  /* ─────────── Ask for location on mount ─────────── */
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setGeoError("Geolocation not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) =>
+        setCoords({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        }),
+      (err) => setGeoError(err.message),
+      { enableHighAccuracy: true, timeout: 15000 }
+    );
+  }, []);
 
   /* ─────────── Refs & click-outside helper ─────────── */
   const inputRef = useRef(null);
@@ -58,35 +63,26 @@ const Questionnaire = () => {
     }, [refs, handler]);
   };
 
-  useOnClickOutsideMultiple(
-    [inputRef, dropdownRef],
-    () => setShowSymptomsDropdown(false)
+  useOnClickOutsideMultiple([inputRef, dropdownRef], () =>
+    setShowSymptomsDropdown(false)
   );
 
   /* ─────────── Submit handler ─────────── */
   const handleClick = async () => {
     setSubmitted(true);
-    if (!details.trim()) return; // simple front-end validation
+    if (!details.trim()) return;
 
-    if (!navigator.geolocation) {
-      console.error("Geolocation not supported");
+    if (coords.lat == null || coords.lng == null) {
+      console.error("Location unavailable:", geoError || "still fetching…");
       return;
     }
 
     try {
-      const { latitude, longitude } = await new Promise((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(
-          (pos) => resolve(pos.coords),
-          reject
-        )
-      );
-
       const hospitals = await getLocationPrices(
-        latitude,
-        longitude,
-        radius || 5
+        coords.lat,
+        coords.lng,
+        radiusMiles
       );
-
       goToResultsPage({ results: hospitals });
     } catch (err) {
       console.error(err);
@@ -104,7 +100,14 @@ const Questionnaire = () => {
       {/* -------- Nav Bar -------- */}
       <nav
         className="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom border-dark px-0"
-        style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 1000 }}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          width: "100vw",
+          zIndex: 1000,
+        }}
       >
         <div className="container-fluid d-flex justify-content-between">
           <button
@@ -121,13 +124,22 @@ const Questionnaire = () => {
             <span style={{ color: "#3AADA4" }}>Rate</span>
           </button>
           <div className="d-flex">
-            <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToAboutPage}>
+            <button
+              className="nav-link text-dark mx-3 bg-transparent border-0"
+              onClick={goToAboutPage}
+            >
               About
             </button>
-            <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToHelpPage}>
+            <button
+              className="nav-link text-dark mx-3 bg-transparent border-0"
+              onClick={goToHelpPage}
+            >
               Help
             </button>
-            <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToSignInPage}>
+            <button
+              className="nav-link text-dark mx-3 bg-transparent border-0"
+              onClick={goToSignInPage}
+            >
               Sign&nbsp;In
             </button>
           </div>
@@ -143,7 +155,8 @@ const Questionnaire = () => {
             </p>
           </div>
 
-          <div className="col-md-8 d-flex justify-content-center mb-5">
+          <div className="col-md-8 d-flex flex-column align-items-center mb-5">
+            {/* -------- Text Entry Card -------- */}
             <div
               className="card shadow-lg d-flex flex-column mx-auto text-center"
               style={{
@@ -163,7 +176,8 @@ const Questionnaire = () => {
                   className="d-flex align-items-center border rounded px-3 py-2"
                   style={{
                     backgroundColor: "#f8f9fa",
-                    borderColor: submitted && details.trim() === "" ? "red" : "#ced4da",
+                    borderColor:
+                      submitted && details.trim() === "" ? "red" : "#ced4da",
                   }}
                 >
                   <textarea
@@ -188,6 +202,7 @@ const Questionnaire = () => {
                     style={{
                       backgroundColor: "#241A90",
                       color: "#fff",
+                      border: "none",
                       borderRadius: "50%",
                       width: 40,
                       height: 40,
@@ -197,20 +212,60 @@ const Questionnaire = () => {
                       marginLeft: 10,
                       transition: "background-color 0.2s ease-in-out",
                     }}
-                    onMouseOver={(e) => (e.target.style.backgroundColor = "#3b2dbb")}
-                    onMouseOut={(e) => (e.target.style.backgroundColor = "#241A90")}
-                    onClick={handleClick}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = "#3b2dbb"; // ← use currentTarget
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = "#241A90";
+                    }}
+                    //onClick={}
                   >
                     <FaArrowRight />
                   </button>
+
                 </div>
                 {submitted && details.trim() === "" && (
                   <div className="text-danger mt-2">
                     Please provide some information before proceeding.
                   </div>
                 )}
+
+                {geoError && (
+                  <div className="text-warning mt-2">
+                    Location unavailable: {geoError}. Results may be less
+                    accurate.
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* -------- New Full-Width Button -------- */}
+            <button
+              type="button"
+              className="btn mt-3"
+              style={{
+                width: "100%",
+                maxWidth: 1000,
+                backgroundColor: "#241A90",
+                color: "#fff",
+                fontWeight: 600,
+                padding: "0.75rem",
+                borderRadius: 12,
+                border: "2px solid #241A90",
+                transition: "background-color 0.2s ease-in-out",
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = "#3b2dbb";
+                e.target.style.borderColor = "#3b2dbb";       // ← change border, too
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = "#241A90";
+                e.target.style.borderColor = "#241A90";       // ← restore original border
+              }}
+              onClick={handleClick}
+            >
+              Search Hospitals Near Me
+            </button>
           </div>
         </div>
       </div>
