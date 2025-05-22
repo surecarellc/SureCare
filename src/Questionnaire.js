@@ -1,12 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigation } from "./utils/goToFunctions.js";
 import { FaArrowRight } from "react-icons/fa";
-import { getLocationPrices } from "./services/userService.js";
+import { useNavigation } from "./utils/goToFunctions";
+import { getLocationPrices } from "./services/userService";
 
 const Questionnaire = () => {
-  /* ─────────── Navigation helpers ─────────── */
   const {
     goToAboutPage,
     goToHelpPage,
@@ -15,21 +14,16 @@ const Questionnaire = () => {
     goToResultsPage,
   } = useNavigation();
 
-  /* ─────────── State ─────────── */
-  const [, setShowSymptomsDropdown] = useState(false);
   const [details, setDetails] = useState("");
   const [submitted, setSubmitted] = useState(false);
-
-  // location state
+  const [launched, setLaunched] = useState(false);
   const [coords, setCoords] = useState({ lat: null, lng: null });
   const [geoError, setGeoError] = useState(null);
-
   const radiusMiles = 5;
 
-  /* ─────────── Ask for location on mount ─────────── */
   useEffect(() => {
     if (!navigator.geolocation) {
-      setGeoError("Geolocation not supported by your browser.");
+      setGeoError("Geolocation not supported");
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -43,40 +37,17 @@ const Questionnaire = () => {
     );
   }, []);
 
-  /* ─────────── Refs & click-outside helper ─────────── */
-  const inputRef = useRef(null);
-  const dropdownRef = useRef(null);
-
-  const useOnClickOutsideMultiple = (refs, handler) => {
-    useEffect(() => {
-      const listener = (e) => {
-        if (refs.every((r) => !r.current || !r.current.contains(e.target))) {
-          handler();
-        }
-      };
-      document.addEventListener("mousedown", listener);
-      document.addEventListener("touchstart", listener);
-      return () => {
-        document.removeEventListener("mousedown", listener);
-        document.removeEventListener("touchstart", listener);
-      };
-    }, [refs, handler]);
-  };
-
-  useOnClickOutsideMultiple([inputRef, dropdownRef], () =>
-    setShowSymptomsDropdown(false)
-  );
-
-  /* ─────────── Submit handler ─────────── */
-  const handleClick = async () => {
+  const handleArrowClick = () => {
     setSubmitted(true);
     if (!details.trim()) return;
+    setLaunched(true);
+  };
 
-    if (coords.lat == null || coords.lng == null) {
-      console.error("Location unavailable:", geoError || "still fetching…");
+  const handleSearchClick = async () => {
+    if (!coords.lat) {
+      console.error("No location:", geoError || "still fetching");
       return;
     }
-
     try {
       const hospitals = await getLocationPrices(
         coords.lat,
@@ -84,30 +55,22 @@ const Questionnaire = () => {
         radiusMiles
       );
       goToResultsPage({ results: hospitals });
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
     }
   };
 
-  /* ─────────── UI ─────────── */
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay: 0.2 }}
+      transition={{ duration: 0.7 }}
       className="d-flex flex-column min-vh-100"
     >
-      {/* -------- Nav Bar -------- */}
+      {/* -------- Nav -------- */}
       <nav
-        className="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom border-dark px-0"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          width: "100vw",
-          zIndex: 1000,
-        }}
+        className="navbar navbar-light bg-white shadow-sm border-bottom px-0"
+        style={{ position: "fixed", width: "100vw", zIndex: 1000 }}
       >
         <div className="container-fluid d-flex justify-content-between">
           <button
@@ -115,168 +78,131 @@ const Questionnaire = () => {
             style={{
               fontSize: "2rem",
               fontWeight: 700,
-              cursor: "pointer",
               background: "none",
               border: "none",
+              cursor: "pointer",
             }}
           >
             <span style={{ color: "#241A90" }}>True</span>
             <span style={{ color: "#3AADA4" }}>Rate</span>
           </button>
           <div className="d-flex">
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToAboutPage}
-            >
+            <button className="nav-link" onClick={goToAboutPage}>
               About
             </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToHelpPage}
-            >
+            <button className="nav-link" onClick={goToHelpPage}>
               Help
             </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToSignInPage}
-            >
-              Sign&nbsp;In
+            <button className="nav-link" onClick={goToSignInPage}>
+              Sign In
             </button>
           </div>
         </div>
       </nav>
 
-      {/* -------- Body -------- */}
-      <div className="container flex-fill d-flex flex-column justify-content-center align-items-center text-center pt-5">
-        <div className="row w-100 d-flex justify-content-center align-items-center mt-5 mb-2">
-          <div className="col-md-6 d-flex flex-column justify-content-center text-center">
-            <p className="fs-2" style={{ fontWeight: 400 }}>
-              Get started today. We can help.
-            </p>
+      {/* ===== Main Area ===== */}
+      <div
+        className="flex-fill d-flex flex-column align-items-center"
+        style={{
+          justifyContent: launched ? "flex-end" : "center",
+          padding: "2rem 1rem",
+          transition: "justify-content 0.5s ease",
+        }}
+      >
+        {/* Prompt Box */}
+        <motion.div
+          layout
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="input-group"
+          style={{
+            maxWidth: 600,
+            width: "100%",
+            background: "#f8f9fa",
+            border: "2px solid gray",
+            borderRadius: 20,
+            overflow: "hidden",
+            padding: "0.5rem",
+          }}
+        >
+          <textarea
+            className="form-control border-0 bg-transparent"
+            placeholder="Type your symptoms or preferences…"
+            rows={1}
+            style={{ resize: "none" }}
+            value={details}
+            onChange={(e) => setDetails(e.target.value)}
+          />
+          <button
+            className="btn"
+            style={{
+              background: "#241A90",
+              color: "#fff",
+              border: "none",
+              borderRadius: "50%",
+              width: 40,
+              height: 40,
+            }}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.background = "#3b2dbb")
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.background = "#241A90")
+            }
+            onClick={handleArrowClick}
+          >
+            <FaArrowRight />
+          </button>
+        </motion.div>
+
+        {/* Validation/Error */}
+        {submitted && !details.trim() && (
+          <div className="text-danger mt-2">
+            Please enter something before proceeding.
           </div>
-
-          <div className="col-md-8 d-flex flex-column align-items-center mb-5">
-            {/* -------- Text Entry Card -------- */}
-            <div
-              className="card shadow-lg d-flex flex-column mx-auto text-center"
-              style={{
-                borderRadius: 20,
-                maxHeight: 900,
-                maxWidth: 1000,
-                overflow: "hidden",
-                width: "100%",
-                border: "2px solid gray",
-              }}
-            >
-              <div
-                className="card-body p-4 d-flex flex-column"
-                style={{ overflowY: "auto", flex: 1 }}
-              >
-                <div
-                  className="d-flex align-items-center border rounded px-3 py-2"
-                  style={{
-                    backgroundColor: "#f8f9fa",
-                    borderColor:
-                      submitted && details.trim() === "" ? "red" : "#ced4da",
-                  }}
-                >
-                  <textarea
-                    ref={inputRef}
-                    id="details"
-                    className="form-control border-0"
-                    rows={1}
-                    placeholder="Type your symptoms or preferences..."
-                    style={{
-                      resize: "none",
-                      boxShadow: "none",
-                      backgroundColor: "transparent",
-                      fontSize: "1rem",
-                      overflow: "hidden",
-                    }}
-                    value={details}
-                    onChange={(e) => setDetails(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="btn p-2"
-                    style={{
-                      backgroundColor: "#241A90",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "50%",
-                      width: 40,
-                      height: 40,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginLeft: 10,
-                      transition: "background-color 0.2s ease-in-out",
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = "#3b2dbb"; // ← use currentTarget
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.backgroundColor = "#241A90";
-                    }}
-                    //onClick={}
-                  >
-                    <FaArrowRight />
-                  </button>
-
-                </div>
-                {submitted && details.trim() === "" && (
-                  <div className="text-danger mt-2">
-                    Please provide some information before proceeding.
-                  </div>
-                )}
-
-                {geoError && (
-                  <div className="text-warning mt-2">
-                    Location unavailable: {geoError}. Results may be less
-                    accurate.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* -------- New Full-Width Button -------- */}
-            <button
-              type="button"
-              className="btn mt-3"
-              style={{
-                width: "100%",
-                maxWidth: 1000,
-                backgroundColor: "#241A90",
-                color: "#fff",
-                fontWeight: 600,
-                padding: "0.75rem",
-                borderRadius: 12,
-                border: "2px solid #241A90",
-                transition: "background-color 0.2s ease-in-out",
-              }}
-              onMouseOver={(e) => {
-                e.target.style.backgroundColor = "#3b2dbb";
-                e.target.style.borderColor = "#3b2dbb";       // ← change border, too
-              }}
-              onMouseOut={(e) => {
-                e.target.style.backgroundColor = "#241A90";
-                e.target.style.borderColor = "#241A90";       // ← restore original border
-              }}
-              onClick={handleClick}
-            >
-              Search Hospitals Near Me
-            </button>
+        )}
+        {geoError && (
+          <div className="text-warning mt-2">
+            Location unavailable: {geoError}
           </div>
-        </div>
+        )}
+
+        {/* Fade-in Search Button */}
+        {launched && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="btn mt-3"
+            style={{
+              maxWidth: 600,
+              width: "100%",
+              background: "#241A90",
+              color: "#fff",
+              padding: "0.75rem",
+              borderRadius: 12,
+              border: "2px solid #241A90",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = "#3b2dbb";
+              e.currentTarget.style.borderColor = "#3b2dbb";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = "#241A90";
+              e.currentTarget.style.borderColor = "#241A90";
+            }}
+            onClick={handleSearchClick}
+          >
+            Search Hospitals Near Me
+          </motion.button>
+        )}
       </div>
 
       {/* -------- Footer -------- */}
       <motion.footer
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark"
-        style={{ position: "relative", bottom: 0, left: 0, right: 0, width: "100vw" }}
+        transition={{ duration: 0.5 }}
+        className="text-center p-4 text-muted bg-white shadow-sm border-top"
       >
         © 2025 TrueRate. All rights reserved.
       </motion.footer>
