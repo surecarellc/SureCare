@@ -133,7 +133,8 @@
             marginTop: `${TOP_PADDING}rem`,
             height: `calc(100vh - ${TOP_PADDING}rem - ${BOTTOM_SPACE}rem)`,
             overflowY: "auto",
-            padding: "1rem",
+            padding: "1rem", 
+            scrollbarGutter: "stable", 
           }}
           className="d-flex flex-column align-items-center"
         >
@@ -141,7 +142,8 @@
             <div
               key={i}
               className={`d-flex mb-2 ${m.role === "user" ? "justify-content-end" : "justify-content-start"}`}
-              style={{ maxWidth: 600, width: "100%" }}
+              // MODIFIED: Increased maxWidth for chat bubbles
+              style={{ maxWidth: "calc(600px + 1rem)", width: "100%" }} 
             >
               <div
                 style={{
@@ -171,26 +173,31 @@
             position: "fixed",
             left: 0,
             right: 0,
-            margin: "0 auto",
+            margin: "0 auto", 
             width: "100%",
-            maxWidth: 600,
+            // MODIFIED: Increased maxWidth to make content area wider by 1rem
+            // (600px + 1rem content) + 2rem padding = 600px + 3rem
+            maxWidth: "calc(600px + 3rem)", 
             display: "flex",
             flexDirection: "column",
             gap: ".05rem",
-            padding: "0 1rem",
+            // Padding remains the same for scrollbar compensation
+            paddingLeft: "0.5rem", 
+            paddingRight: "1.5rem",
             zIndex: 100,
+            boxSizing: "border-box", 
           }}
         >
           {/* Prompt */}
           <div
             className="input-group"
             style={{
-              marginTop: "1rem", // pushes prompt box down an extra rem
+              marginTop: "1rem", 
               background: "#f8f9fa",
               border: "2px solid gray",
               borderRadius: 20,
               overflow: "hidden",
-              padding: "0.5rem",
+              padding: "0.5rem", 
             }}
           >
             <textarea
@@ -232,13 +239,13 @@
               transition={{ duration: 0.3, delay: 0.2 }}
               className="btn"
               style={{
-                width: "100%",
+                width: "100%", 
                 background: "#241A90",
                 color: "#fff",
                 padding: "0.75rem",
                 borderRadius: 12,
                 border: "2px solid #241A90",
-                marginTop: "1rem", // pushes button down an extra rem
+                marginTop: "1rem", 
               }}
               onMouseOver={e => {
                 e.currentTarget.style.background = "#3b2dbb";
