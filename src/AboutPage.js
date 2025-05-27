@@ -2,6 +2,9 @@ import React from "react";
 import {useNavigation} from "./utils/goToFunctions.js";
 import { motion, useInView } from "framer-motion";
 import googleImage from "./components/google.png";
+import s_barlaImage from "./components/s_barla.jpg";
+import r_doshiImage from "./components/r_doshi.jpeg";
+import k_vedereImage from "./components/k_vedere.jpg";
 import { useRef } from "react";
 
 const AboutPage = () => {
@@ -97,140 +100,189 @@ const AboutPage = () => {
         className="w-100 py-5"
         style={{ backgroundColor: "#3AADA4" }}
       >
-        <div className="row justify-content-center mx-auto gx-2" style={{ maxWidth: "1200px" }}>
-          {/* Team Member 1 */}
-          <div className="col-md-6 mb-4">
-            <div className="d-flex flex-column align-items-center">
-              <div
-                style={{
-                  width: "150px",
-                  height: "150px",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  marginBottom: "1rem",
-                }}
-              >
-                <img
-                  src={googleImage}
-                  alt="Team Member 1"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
+        <div className="mx-auto" style={{ maxWidth: "1200px" }}>
+          {/* First Row: CEO */}
+          <div className="row justify-content-center mb-4">
+            <div className="col-12 col-md-6 d-flex justify-content-center">
+              <div className="d-flex flex-column align-items-center">
+                <div
+                  style={{
+                    width: "150px",
+                    height: "150px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <img
+                    src={googleImage}
+                    alt="Team Member 1"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+                <h5 style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700", color: "white" }}>
+                  Emily Davis
+                </h5>
+                <p
+                  style={{
+                    fontFamily: "Outfit, sans-serif",
+                    fontWeight: "300",
+                    maxWidth: "250px",
+                    color: "white",
+                  }}
+                >
+                  Founder and CEO. Visionary leader driving healthcare accessibility for all.
+                </p>
               </div>
-              <h5 style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700", color: "white" }}>
-                Jane Doe
-              </h5>
-              <p
-                style={{
-                  fontFamily: "Outfit, sans-serif",
-                  fontWeight: "300",
-                  maxWidth: "250px",
-                  color: "white",
-                }}
-              >
-                Co-founder and CEO. Passionate about making healthcare accessible for all.
-              </p>
             </div>
           </div>
 
-          {/* Team Member 2 */}
-          <div className="col-md-6 mb-4">
-            <div className="d-flex flex-column align-items-center">
-              <div
-                style={{
-                  width: "150px",
-                  height: "150px",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  marginBottom: "1rem",
-                }}
-              >
-                <img
-                  src={googleImage}
-                  alt="Team Member 2"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
+          {/* Second Row: Two Team Members */}
+          <div className="row justify-content-center mb-4 gx-2">
+            <div className="col-md-6">
+              <div className="d-flex flex-column align-items-center">
+                <div
+                  style={{
+                    width: "150px",
+                    height: "150px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <img
+                    src={s_barlaImage}
+                    alt="Saatvik Barla Image"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+                <h5 style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700", color: "white" }}>
+                  Saatvik Barla
+                </h5>
+                <p
+                  style={{
+                    fontFamily: "Outfit, sans-serif",
+                    fontWeight: "300",
+                    maxWidth: "250px",
+                    color: "white",
+                  }}
+                >
+                  I'm deeply passionate about making healthcare 
+                  more accessible and transparent. Leveraging my technical 
+                  expertise in Python, SQL, and Microsoft Azure, I'm currently 
+                  the lead developer on SureCare, where we are trying to simplify 
+                  healthcare pricing by providing clear, accessible hospital data. 
+                  My goal is to empower users with the tools they need to make
+                  informed health decisions.
+                </p>
               </div>
-              <h5 style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700", color: "white" }}>
-                John Smith
-              </h5>
-              <p
-                style={{
-                  fontFamily: "Outfit, sans-serif",
-                  fontWeight: "300",
-                  maxWidth: "250px",
-                  color: "white",
-                }}
-              >
-                CTO. Expert in healthcare tech solutions and innovation.
-              </p>
+            </div>
+            <div className="col-md-6">
+              <div className="d-flex flex-column align-items-center">
+                <div
+                  style={{
+                    width: "150px",
+                    height: "150px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <img
+                    src={r_doshiImage}
+                    alt="Rohan Doshi Image"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+                <h5 style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700", color: "white" }}>
+                  Rohan Doshi
+                </h5>
+                <p
+                  style={{
+                    fontFamily: "Outfit, sans-serif",
+                    fontWeight: "300",
+                    maxWidth: "250px",
+                    color: "white",
+                  }}
+                >
+                  My passion lies in building products that make a meaningful impact 
+                  on people’s lives. At SureCare, I strive to turn that passion into 
+                  reality by applying my skills in UI/UX design, React.js, and Python 
+                  to develop thoughtful, user-focused solutions.
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Team Member 3 */}
-          <div className="col-md-6 mb-4">
-            <div className="d-flex flex-column align-items-center">
-              <div
-                style={{
-                  width: "150px",
-                  height: "150px",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  marginBottom: "1rem",
-                }}
-              >
-                <img
-                  src={googleImage}
-                  alt="Team Member 3"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
+          {/* Third Row: Two Team Members */}
+          <div className="row justify-content-center gx-2">
+            <div className="col-md-6">
+              <div className="d-flex flex-column align-items-center">
+                <div
+                  style={{
+                    width: "150px",
+                    height: "150px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <img
+                    src={k_vedereImage}
+                    alt="Kaarthikeya Vedere Image"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+                <h5 style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700", color: "white" }}>
+                  Kaarthikeya Vedere
+                </h5>
+                <p
+                  style={{
+                    fontFamily: "Outfit, sans-serif",
+                    fontWeight: "300",
+                    maxWidth: "250px",
+                    color: "white",
+                  }}
+                >
+                  As a dedicated developer at SureCare, I am committed to transforming 
+                  healthcare by creating intuitive and reliable solutions. With my expertise 
+                  in Python, Node.js, and database management, I contribute to building a 
+                  platform that delivers transparent pricing and empowers users to make confident, 
+                  informed healthcare choices.
+                </p>
               </div>
-              <h5 style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700", color: "white" }}>
-                Alice Johnson
-              </h5>
-              <p
-                style={{
-                  fontFamily: "Outfit, sans-serif",
-                  fontWeight: "300",
-                  maxWidth: "250px",
-                  color: "white",
-                }}
-              >
-                COO. Dedicated to operational excellence in healthcare.
-              </p>
             </div>
-          </div>
-
-          {/* Team Member 4 */}
-          <div className="col-md-6 mb-4">
-            <div className="d-flex flex-column align-items-center">
-              <div
-                style={{
-                  width: "150px",
-                  height: "150px",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  marginBottom: "1rem",
-                }}
-              >
-                <img
-                  src={googleImage}
-                  alt="Team Member 4"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
+            <div className="col-md-6">
+              <div className="d-flex flex-column align-items-center">
+                <div
+                  style={{
+                    width: "150px",
+                    height: "150px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <img
+                    src={googleImage}
+                    alt="Team Member 5"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+                <h5 style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700", color: "white" }}>
+                  Bob Wilson
+                </h5>
+                <p
+                  style={{
+                    fontFamily: "Outfit, sans-serif",
+                    fontWeight: "300",
+                    maxWidth: "250px",
+                    color: "white",
+                  }}
+                >
+                  CFO. Focused on financial transparency and growth.
+                </p>
               </div>
-              <h5 style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700", color: "white" }}>
-                Bob Wilson
-              </h5>
-              <p
-                style={{
-                  fontFamily: "Outfit, sans-serif",
-                  fontWeight: "300",
-                  maxWidth: "250px",
-                  color: "white",
-                }}
-              >
-                CFO. Focused on financial transparency and growth.
-              </p>
             </div>
           </div>
         </div>
