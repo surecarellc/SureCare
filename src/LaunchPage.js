@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+//import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import launchImage from "./components/launch_image.png";
 import { useNavigation } from "./utils/goToFunctions.js";
-import { getLocationPrices } from "./services/userService.js";
+//import { getLocationPrices } from "./services/userService.js";
 
 const LaunchPage = () => {
-  const [hospitalData, setHospitalData] = useState([]); // <-- Step 1: declare state
+  //const [hospitalData, setHospitalData] = useState([]); // <-- Step 1: declare state
 
   const {
     goToAboutPage,
@@ -16,6 +16,7 @@ const LaunchPage = () => {
   } = useNavigation();
 
   // Step 2: fetch data on load
+  /*
   useEffect(() => {
     console.log("🔥 Console works test"); // ← Test log
 
@@ -28,7 +29,7 @@ const LaunchPage = () => {
         console.error("❌ Failed to fetch hospital data:", err);
       });
   }, []);
-
+*/
 
   return (
     <motion.div
@@ -122,10 +123,12 @@ const LaunchPage = () => {
         </motion.button>
 
         {/* Step 3: Display hospital data */}
+        {/*
         <div className="mt-4 bg-light p-3 rounded" style={{ maxHeight: "200px", overflowY: "scroll", width: "100%" }}>
           <h5>Hospital Data:</h5>
           <pre>{JSON.stringify(hospitalData, null, 2)}</pre>
         </div>
+        */}
       </motion.div>
 
       {/* Footer */}
