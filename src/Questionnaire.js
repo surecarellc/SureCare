@@ -254,13 +254,24 @@ const Questionnaire = () => {
 
       {/* ---------- Inputs Section (static at bottom) ---------- */}
       <div
-        style={{
-          position: "fixed", bottom: "6rem", left: 0, right: 0, margin: "0 auto",
-          width: "100%", maxWidth: "calc(600px + 3rem)", display: "flex",
-          flexDirection: "column", gap: ".5rem", paddingLeft: "0.5rem",
-          paddingRight: "1.5rem", zIndex: 100, boxSizing: "border-box",
-        }}
-      >
+          style={{
+            position: "fixed",
+            bottom: "6rem",
+            left: 0,
+            right: 0,
+            margin: "0 auto",
+            width: "100%",
+            maxWidth: "700px", // ✅ Slightly wider, consistent
+            paddingLeft: "1rem",
+            paddingRight: "1rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: ".5rem",
+            zIndex: 100,
+            boxSizing: "border-box",
+          }}
+        >
+
         <div style={{ display: "flex", gap: ".5rem" }}>
           <input
             type="number" placeholder="Radius (miles)" value={radius}
