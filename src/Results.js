@@ -1,7 +1,16 @@
-import React from "react";
+import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { useNavigation } from "./utils/goToFunctions.js";
+
+const mapContainerStyle = {
+  width: "100%",
+  height: "100%",
+  borderRadius: "20px",
+};
+
+const centerDefault = { lat: 39.5, lng: -98.35 }; // Center of the US
 
 const Results = () => {
   const {
@@ -12,14 +21,7 @@ const Results = () => {
     goToSignInPage,
   } = useNavigation();
 
-  
-
   const location = useLocation();
-  // Support either { results: [...] } or directly an array as state
-    // Grab whatever was pushed via router state. Support:
-  //   navigate('/results', stateArray)
-  //   navigate('/results', { results: stateArray })
-  //   navigate('/results', { state: { results: stateArray } }) ← react‑router signature
   const rawState = location.state;
   const results = Array.isArray(rawState)
     ? rawState
@@ -27,8 +29,26 @@ const Results = () => {
     ? rawState.results
     : [];
 
-  console.log("📦 location.state →", rawState);
-  console.log("📊 parsed results length:", results.length);
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+  });
+
+  const mapRef = useRef(null);
+
+  const mapCenter =
+    results.length > 0 && results[0].lat && results[0].lng
+      ? { lat: results[0].lat, lng: results[0].lng }
+      : centerDefault;
+
+  const panToLocation = (lat, lng) => {
+    if (mapRef.current) {
+      mapRef.current.panTo({ lat, lng });
+      mapRef.current.setZoom(16); // Zoom in closer on click
+    }
+  };
+
+  if (loadError) return <div>Error loading maps</div>;
+  if (!isLoaded) return <div>Loading Maps...</div>;
 
   return (
     <motion.div
@@ -45,7 +65,13 @@ const Results = () => {
         <div className="container-fluid d-flex justify-content-between">
           <button
             onClick={goToLaunchPage}
-            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
+            style={{
+              fontSize: "2rem",
+              fontWeight: "700",
+              cursor: "pointer",
+              background: "none",
+              border: "none",
+            }}
           >
             <span style={{ color: "#241A90" }}>True</span>
             <span style={{ color: "#3AADA4" }}>Rate</span>
@@ -72,22 +98,29 @@ const Results = () => {
         </div>
 
         <div className="col-12 d-flex flex-column flex-md-row justify-content-center mb-5">
+          {/* Map */}
           <div className="col-md-5 mb-4 mb-md-0">
-            <div
-              className="card shadow-lg"
-              style={{
-                borderRadius: "20px",
-                height: "500px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "#f8f9fa",
-              }}
-            >
-              <p className="text-muted fs-4">Insert Map Later</p>
+            <div className="card shadow-lg" style={{ borderRadius: "20px", height: "500px", backgroundColor: "#f8f9fa" }}>
+              <GoogleMap
+                mapContainerStyle={mapContainerStyle}
+                zoom={10}
+                center={mapCenter}
+                onLoad={(map) => (mapRef.current = map)}
+              >
+                {results.map((result, index) =>
+                  result.lat && result.lng ? (
+                    <Marker
+                      key={index}
+                      position={{ lat: result.lat, lng: result.lng }}
+                      title={result.name}
+                    />
+                  ) : null
+                )}
+              </GoogleMap>
             </div>
           </div>
 
+          {/* Results List */}
           <div className="col-md-7">
             <div
               className="card shadow-lg"
@@ -107,6 +140,8 @@ const Results = () => {
                     <div
                       key={index}
                       className="d-flex justify-content-between align-items-center border-bottom py-3"
+                      onClick={() => panToLocation(result.lat, result.lng)}
+                      style={{ cursor: "pointer" }}
                     >
                       <div className="text-start">
                         <h5 className="fw-bold mb-1">{result.name || "Unknown Name"}</h5>
@@ -121,6 +156,7 @@ const Results = () => {
                           rel="noopener noreferrer"
                           className="btn btn-outline-dark btn-sm"
                           style={{ borderRadius: "20px" }}
+                          onClick={(e) => e.stopPropagation()} // Prevent zoom when website clicked
                         >
                           Visit Website
                         </a>
@@ -135,6 +171,7 @@ const Results = () => {
           </div>
         </div>
 
+        {/* Back Button */}
         <div className="col-12 mt-4 d-flex justify-content-center">
           <button
             type="button"
