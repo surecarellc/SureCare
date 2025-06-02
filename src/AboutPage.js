@@ -6,6 +6,7 @@ import s_barlaImage from "./components/s_barla.jpg";
 import r_doshiImage from "./components/r_doshi.jpeg";
 import k_vedereImage from "./components/k_vedere.jpg";
 import a_khatwaniImage from "./components/a_khatwani.jpg";
+import a_ellisImage from "./components/a_ellis.jpg";
 import { useRef } from "react";
 
 const AboutPage = () => {
@@ -234,7 +235,7 @@ const AboutPage = () => {
                   <div>
                     <div className="position-relative">
                       <img
-                        src={googleImage}
+                        src={a_ellisImage}
                         alt="Andrew Ellis"
                         className="rounded-circle"
                         style={{ width: "200px", height: "200px", objectFit: "cover", border: "5px solid #FFFFFF" }}
