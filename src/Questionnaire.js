@@ -1,13 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaTimes } from "react-icons/fa"; // Added FaTimes
 import { useNavigation } from "./utils/goToFunctions";
 import { getLocationPrices, geocodeAddress } from "./services/userService"; // Assuming geocodeAddress is in this file
 
 const STORAGE_KEY = "chatMessages";
 const TOP_PADDING = 5.5;
-const BOTTOM_SPACE = 16.75;
+const BOTTOM_SPACE = 16.5; // Adjusted for the new "Enter Address" button
 
 const Questionnaire = () => {
   const {
@@ -20,8 +20,9 @@ const Questionnaire = () => {
 
   const [details, setDetails] = useState("");
   const [, setSubmitted] = useState(false);
-  const [radius, setRadius] = useState("");
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState(""); // This will now be used by the popup
+  const [showAddressPopup, setShowAddressPopup] = useState(false); // For popup visibility
+
   const [messages, setMessages] = useState(() => {
     try {
       const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -32,11 +33,11 @@ const Questionnaire = () => {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   }, [messages]);
 
-  const [coords, setCoords] = useState({ lat: null, lng: null }); // From device geolocation
+  const [coords, setCoords] = useState({ lat: null, lng: null });
   const [geoError, setGeoError] = useState(null);
   const [showGeoErrorBanner, setShowGeoErrorBanner] = useState(false);
   const geoErrorTimeoutRef = useRef(null);
-  const [isProcessingLocation, setIsProcessingLocation] = useState(false); // Unified loading state for geocoding or hospital search
+  const [isProcessingLocation, setIsProcessingLocation] = useState(false);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -82,22 +83,10 @@ const Questionnaire = () => {
   }, [geoError]);
 
   const isDeviceGeoAvailable = coords.lat !== null && !geoError;
-  const addressPlaceholderText = isDeviceGeoAvailable
-    ? "Use custom address. (street, city, state, zip code)"
-    : geoError
-    ? "Please enter address. (street, city, state, zip code)"
-    : "Enter address or enable location";
+  const isAddressEntered = address.trim() !== ""; // Based on address from popup
 
-  const isValidRadius = !isNaN(Number(radius)) && Number(radius) > 0;
-  const isAddressEntered = address.trim() !== "";
-
-  // Search button is disabled if:
-  // - Processing location (geocoding or fetching hospitals)
-  // - Radius is not valid
-  // - OR (No address is entered AND device geolocation is NOT available)
   const isSearchDisabled =
     isProcessingLocation ||
-    !isValidRadius ||
     (!isAddressEntered && !isDeviceGeoAvailable);
 
   const handleArrowClick = () => {
@@ -113,22 +102,16 @@ const Questionnaire = () => {
   };
 
   const handleSearchClick = async () => {
-    const radNum = Number(radius);
-    if (isNaN(radNum) || radNum <= 0) {
-      alert("Please enter a valid number for radius.");
-      return;
-    }
-
-    setIsProcessingLocation(true); // Set loading state at the beginning
+    setIsProcessingLocation(true);
 
     let searchLat = null;
     let searchLng = null;
-    let searchAddressString = "Unknown Location"; // For display/logging
+    let searchAddressString = "Unknown Location";
 
-    if (isAddressEntered) { // Priority 1: Manually entered address
+    if (isAddressEntered) { // Priority 1: Manually entered address (from popup)
       try {
         console.log(`Attempting to geocode user-entered address: "${address}"`);
-        const geocodedData = await geocodeAddress(address); // Assumes geocodeAddress returns {lat, lng} or null
+        const geocodedData = await geocodeAddress(address);
         if (geocodedData && typeof geocodedData.lat === 'number' && typeof geocodedData.lng === 'number') {
           searchLat = geocodedData.lat;
           searchLng = geocodedData.lng;
@@ -145,28 +128,33 @@ const Questionnaire = () => {
         setIsProcessingLocation(false);
         return;
       }
-    } else if (isDeviceGeoAvailable) { // Priority 2: Device geolocation (if no address was entered)
+    } else if (isDeviceGeoAvailable) { // Priority 2: Device geolocation
       console.log("Using device geolocation.");
       searchLat = coords.lat;
       searchLng = coords.lng;
       searchAddressString = "Current Device Location";
-    } else { // Neither address entered nor device location available
+    } else {
       alert("Location is not available. Please enter a valid address or enable device location services.");
       setIsProcessingLocation(false);
       return;
     }
 
-    // If we've reached here, searchLat and searchLng should be populated.
-    // The isProcessingLocation state is already true.
     try {
-      console.log(`Fetching hospitals for: ${searchAddressString} (Lat: ${searchLat}, Lng: ${searchLng}), Radius: ${radNum}`);
-      const hospitals = await getLocationPrices(searchLat, searchLng, radNum);
-      goToResultsPage({ results: hospitals, searchLocation: { lat: searchLat, lng: searchLng, address: searchAddressString } });
+      console.log(`Fetching hospitals for: ${searchAddressString} (Lat: ${searchLat}, Lng: ${searchLng})`);
+      const hospitals = await getLocationPrices(searchLat, searchLng, 5);
+      goToResultsPage({
+        results: hospitals,
+        searchLocation: {
+          lat: searchLat,
+          lng: searchLng,
+          address: searchAddressString
+        },
+      });
     } catch (e) {
       console.error("Failed to fetch hospital data:", e);
       alert("Failed to fetch hospital data. Please try again later.");
     } finally {
-      setIsProcessingLocation(false); // Reset loading state after all operations
+      setIsProcessingLocation(false);
     }
   };
 
@@ -188,8 +176,8 @@ const Questionnaire = () => {
             onClick={goToLaunchPage}
             style={{ fontSize: "2rem", fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}
           >
-            <span style={{ color: "#241A90" }}>True</span>
-            <span style={{ color: "#3AADA4" }}>Rate</span>
+            <span style={{ color: "#241A90" }}>Sure</span>
+            <span style={{ color: "#3AADA4" }}>Care</span>
           </button>
           <div className="d-flex">
             <button className="nav-link mx-3" onClick={goToAboutPage}>About</button>
@@ -252,45 +240,97 @@ const Questionnaire = () => {
         </AnimatePresence>
       </div>
 
+      {/* ---------- Address Popup Modal ---------- */}
+      <AnimatePresence>
+        {showAddressPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+              background: "rgba(0,0,0,0.6)", display: "flex",
+              alignItems: "center", justifyContent: "center", zIndex: 2000,
+            }}
+            onClick={() => setShowAddressPopup(false)} // Close on overlay click
+          >
+            <motion.div
+              initial={{ scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.7, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              style={{
+                background: "white", padding: "2rem", borderRadius: "12px",
+                minWidth: "300px", maxWidth: "500px", width: "90%",
+                boxShadow: "0 10px 25px rgba(0,0,0,0.1)", position: "relative",
+              }}
+              onClick={(e) => e.stopPropagation()} // Prevent click from closing if clicking inside popup
+            >
+              <button
+                onClick={() => setShowAddressPopup(false)}
+                style={{
+                  position: "absolute", top: "1rem", right: "1rem",
+                  background: "none", border: "none", fontSize: "1.5rem", cursor: "pointer", color: "#6c757d"
+                }}
+                aria-label="Close address popup"
+              >
+                <FaTimes />
+              </button>
+              <h4 style={{ marginTop: 0, marginBottom: "1.5rem", color: "#333" }}>Enter Your Address</h4>
+              <textarea
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="E.g., 1600 Amphitheatre Parkway, Mountain View, CA 94043"
+                rows={3}
+                style={{
+                  width: "100%", marginBottom: "1.5rem", padding: "0.75rem",
+                  borderRadius: "8px", border: "1px solid #ced4da", fontSize: "1rem",
+                  resize: "none", boxSizing: "border-box"
+                }}
+                disabled={isProcessingLocation}
+              />
+              <button
+                onClick={() => setShowAddressPopup(false)}
+                style={{
+                  width: "100%", background: "#241A90", color: "#fff",
+                  padding: "0.75rem", borderRadius: "8px", border: "none",
+                  fontSize: "1rem", cursor: "pointer",
+                }}
+                onMouseOver={e => (e.currentTarget.style.background = "#3b2dbb")}
+                onMouseOut={e => (e.currentTarget.style.background = "#241A90")}
+                disabled={isProcessingLocation}
+              >
+                Use this Address
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ---------- Inputs Section (static at bottom) ---------- */}
       <div
-          style={{
-            position: "fixed",
-            bottom: "6rem",
-            left: 0,
-            right: 0,
-            margin: "0 auto",
-            width: "100%",
-            maxWidth: "700px", // ✅ Slightly wider, consistent
-            paddingLeft: "1rem",
-            paddingRight: "1rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: ".5rem",
-            zIndex: 100,
-            boxSizing: "border-box",
-          }}
-        >
-
-        <div style={{ display: "flex", gap: ".5rem" }}>
-          <input
-            type="number" placeholder="Radius (miles)" value={radius}
-            onChange={e => setRadius(e.target.value)} className="form-control"
-            style={{ flex: 1, border: "2px solid gray", borderRadius: 12, padding: "0.5rem 1rem" }}
-            disabled={isProcessingLocation}
-          />
-          <input
-            type="text" placeholder={addressPlaceholderText} value={address}
-            onChange={e => setAddress(e.target.value)} className="form-control"
-            style={{ flex: 2, border: "2px solid gray", borderRadius: 12, padding: "0.5rem 1rem" }}
-            disabled={isProcessingLocation}
-          />
-        </div>
+        style={{
+          position: "fixed",
+          bottom: "6rem", // Space for footer below this
+          left: 0,
+          right: 0,
+          margin: "0 auto",
+          width: "100%",
+          maxWidth: "700px",
+          paddingLeft: "1rem",
+          paddingRight: "1rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.75rem", // Adjusted gap for better spacing
+          zIndex: 100,
+          boxSizing: "border-box",
+        }}
+      >
         <div className="input-group" style={{ background: "#f8f9fa", border: "2px solid gray", borderRadius: 20, overflow: "hidden", padding: "0.5rem" }}>
           <textarea
             className="form-control border-0 bg-transparent"
             placeholder="Type your symptoms or preferences…" rows={1}
-            style={{ resize: "none" }} value={details}
+            style={{ resize: "none", boxShadow: "none" }} value={details}
             onChange={e => setDetails(e.target.value)}
             disabled={isProcessingLocation}
           />
@@ -309,15 +349,44 @@ const Questionnaire = () => {
             <FaArrowRight size={16} />
           </button>
         </div>
+
+        {/* Button to open address popup */}
+        <button
+          className="btn"
+          style={{
+            width: "100%",
+            background: isProcessingLocation ? "#e9ecef" : "#6c757d",
+            color: isProcessingLocation ? "#6c757d" : "#fff",
+            padding: "0.75rem",
+            borderRadius: 12,
+            border: "2px solid",
+            borderColor: isProcessingLocation ? "#e9ecef" : "#6c757d",
+            cursor: isProcessingLocation ? "not-allowed" : "pointer",
+            transition: "background-color 0.2s ease, border-color 0.2s ease",
+            textAlign: "left", // To keep text aligned left if it wraps
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+          onMouseOver={e => { if (!isProcessingLocation) { e.currentTarget.style.background = "#5a6268"; e.currentTarget.style.borderColor = "#545b62"; }}}
+          onMouseOut={e => { if (!isProcessingLocation) { e.currentTarget.style.background = "#6c757d"; e.currentTarget.style.borderColor = "#6c757d"; }}}
+          onClick={() => setShowAddressPopup(true)}
+          disabled={isProcessingLocation}
+        >
+          {isAddressEntered ? `Edit Address: ${address}` : "Enter Address Manually"}
+        </button>
+
         <button
           className="btn"
           disabled={isSearchDisabled}
           style={{
             width: "100%", background: isSearchDisabled ? "#ccc" : "#241A90",
             color: "#fff", padding: "0.75rem", borderRadius: 12, border: "2px solid",
-            borderColor: isSearchDisabled ? "#ccc" : "#241A90", marginTop: "0.5rem",
+            borderColor: isSearchDisabled ? "#ccc" : "#241A90",
+            // marginTop: "0.5rem", // gap property on parent handles this
             cursor: isSearchDisabled ? "not-allowed" : "pointer",
             transition: "background-color 0.2s ease, border-color 0.2s ease",
+            fontWeight: "bold",
           }}
           onMouseOver={e => { if (!isSearchDisabled) { e.currentTarget.style.background = "#3b2dbb"; e.currentTarget.style.borderColor = "#3b2dbb"; } }}
           onMouseOut={e => { if (!isSearchDisabled) { e.currentTarget.style.background = "#241A90"; e.currentTarget.style.borderColor = "#241A90"; } }}
@@ -335,7 +404,7 @@ const Questionnaire = () => {
         style={{ position: "fixed", bottom: 0, width: "100%", zIndex: 1000 }}
         className="text-center p-4 text-muted bg-white shadow-sm border-top"
       >
-        © 2025 TrueRate. All rights reserved.
+        © 2025 SureCare. All rights reserved.
       </motion.footer>
     </motion.div>
   );

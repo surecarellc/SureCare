@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
@@ -11,6 +11,25 @@ const mapContainerStyle = {
 };
 
 const centerDefault = { lat: 39.5, lng: -98.35 }; // Center of the US
+ 
+// Haversine formula to calculate distance between two lat/lng points in miles
+function getDistanceMiles(lat1, lng1, lat2, lng2) {
+  function toRad(x) {
+    return (x * Math.PI) / 180;
+  }
+
+  const R = 3958.8; // Radius of Earth in miles
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 const Results = () => {
   const {
@@ -22,12 +41,12 @@ const Results = () => {
   } = useNavigation();
 
   const location = useLocation();
-  const rawState = location.state;
-  const results = Array.isArray(rawState)
-    ? rawState
-    : Array.isArray(rawState?.results)
-    ? rawState.results
-    : [];
+  const allResults = useMemo(() => {
+    const rawState = location.state;
+      if (Array.isArray(rawState)) return rawState;
+      if (Array.isArray(rawState?.results)) return rawState.results;
+      return [];
+    }, [location.state]);
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -36,14 +55,31 @@ const Results = () => {
   const mapRef = useRef(null);
 
   const mapCenter =
-    results.length > 0 && results[0].lat && results[0].lng
-      ? { lat: results[0].lat, lng: results[0].lng }
+    allResults.length > 0 && allResults[0].lat && allResults[0].lng
+      ? { lat: allResults[0].lat, lng: allResults[0].lng }
       : centerDefault;
+
+  // State for radius in miles, default 5, min 1
+  const [radius, setRadius] = useState(5);
+
+  // Filter results based on radius around first hospital
+  const filteredResults = useMemo(() => {
+    if (allResults.length === 0) return [];
+
+    const centerLat = allResults[0].lat;
+    const centerLng = allResults[0].lng;
+
+    return allResults.filter((r) => {
+      if (!r.lat || !r.lng) return false;
+      const dist = getDistanceMiles(centerLat, centerLng, r.lat, r.lng);
+      return dist <= radius;
+    });
+  }, [allResults, radius]);
 
   const panToLocation = (lat, lng) => {
     if (mapRef.current) {
       mapRef.current.panTo({ lat, lng });
-      mapRef.current.setZoom(16); // Zoom in closer on click
+      mapRef.current.setZoom(16);
     }
   };
 
@@ -73,8 +109,8 @@ const Results = () => {
               border: "none",
             }}
           >
-            <span style={{ color: "#241A90" }}>True</span>
-            <span style={{ color: "#3AADA4" }}>Rate</span>
+            <span style={{ color: "#241A90" }}>Sure</span>
+            <span style={{ color: "#3AADA4" }}>Care</span>
           </button>
           <div className="d-flex">
             <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToAboutPage}>
@@ -90,11 +126,29 @@ const Results = () => {
         </div>
       </nav>
 
-      <div className="row w-100 d-flex justify-content-center align-items-center flex-grow-1 mt-5">
-        <div className="col-12 d-flex flex-column justify-content-center text-center mt-5">
-          <p className="fs-1" style={{ fontWeight: "300" }}>
-            Your Top Healthcare Options
-          </p>
+      {/* Radius scrollbar replacing the top heading */}
+      <div
+        className="w-100 d-flex justify-content-center align-items-center mt-5 pt-4"
+        style={{ maxWidth: "600px" }}
+      >
+        <label htmlFor="radiusRange" className="me-3 fs-5" style={{ minWidth: "130px" }}>
+          Search Radius: <strong>{radius} mile{radius > 1 ? "s" : ""}</strong>
+        </label>
+        <input
+          type="range"
+          id="radiusRange"
+          min="1"
+          max="50"
+          step="1"
+          value={radius}
+          onChange={(e) => setRadius(Number(e.target.value))}
+          style={{ flexGrow: 1 }}
+        />
+      </div>
+
+      <div className="row w-100 d-flex justify-content-center align-items-center flex-grow-1 mt-3">
+        <div className="col-12 d-flex flex-column justify-content-center text-center mt-2">
+          {/* Removed the old heading here */}
         </div>
 
         <div className="col-12 d-flex flex-column flex-md-row justify-content-center mb-5">
@@ -107,7 +161,7 @@ const Results = () => {
                 center={mapCenter}
                 onLoad={(map) => (mapRef.current = map)}
               >
-                {results.map((result, index) =>
+                {filteredResults.map((result, index) =>
                   result.lat && result.lng ? (
                     <Marker
                       key={index}
@@ -133,10 +187,10 @@ const Results = () => {
             >
               <div className="card-body p-4">
                 <h3 className="fw-bold mb-4">Top Matches</h3>
-                {results.length === 0 ? (
-                  <p className="text-muted">No results found. Try adjusting your search.</p>
+                {filteredResults.length === 0 ? (
+                  <p className="text-muted">No results found within the selected radius.</p>
                 ) : (
-                  results.map((result, index) => (
+                  filteredResults.map((result, index) => (
                     <div
                       key={index}
                       className="d-flex justify-content-between align-items-center border-bottom py-3"
@@ -156,7 +210,7 @@ const Results = () => {
                           rel="noopener noreferrer"
                           className="btn btn-outline-dark btn-sm"
                           style={{ borderRadius: "20px" }}
-                          onClick={(e) => e.stopPropagation()} // Prevent zoom when website clicked
+                          onClick={(e) => e.stopPropagation()}
                         >
                           Visit Website
                         </a>
@@ -195,7 +249,7 @@ const Results = () => {
         className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark px-0"
         style={{ position: "fixed", bottom: 0, left: 0, right: 0, width: "100vw" }}
       >
-        © 2025 TrueRate. All rights reserved.
+        © 2025 SureCare. All rights reserved.
       </footer>
     </motion.div>
   );

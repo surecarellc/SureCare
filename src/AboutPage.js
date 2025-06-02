@@ -52,13 +52,19 @@ const AboutPage = () => {
         className="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom border-dark px-3"
         style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 1000 }}
       >
-        <div className="container-xl d-flex justify-content-between">
+        <div className="container-fluid">
           <button
             onClick={goToLaunchPage}
-            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
+            style={{
+              fontSize: "2rem",
+              fontWeight: "700",
+              cursor: "pointer",
+              background: "none",
+              border: "none",
+            }}
           >
-            <span style={{ color: "#241A90" }}>True</span>
-            <span style={{ color: "#3AADA4" }}>Rate</span>
+            <span style={{ color: "#241A90" }}>Sure</span>
+            <span style={{ color: "#3AADA4" }}>Care</span>
           </button>
           <div className="d-flex">
             <button
@@ -169,7 +175,7 @@ const AboutPage = () => {
                       marginBottom: "0",
                     }}
                   >
-                    I'm deeply passionate about making healthcare more accessible and transparent. Leveraging my technical expertise in Python, SQL, and Microsoft Azure, I'm currently the lead developer on SureCare, where we are trying to simplify healthcare pricing by providing clear, accessible hospital data. My goal is to empower users with the tools they need to make informed health decisions.
+                    I'm passionate about making healthcare more accessible and transparent. As lead developer on SureCare, I use Python, SQL, and Azure to simplify healthcare pricing by providing clear hospital data, empowering users to make informed decisions.
                   </p>
                 </div>
               </motion.div>
@@ -394,7 +400,7 @@ const AboutPage = () => {
       {/* Footer */}
       <footer className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark px-0"
         style={{ position: "fixed", bottom: 0, left: 0, right: 0, width: "100vw" }}>
-        &copy; 2025 TrueRate. All rights reserved.
+        &copy; 2025 SureCare. All rights reserved.
       </footer>
     </motion.div>
   );
