@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigation } from "./utils/goToFunctions.js";
 import { motion, useInView } from "framer-motion";
-import googleImage from "./components/google.png";
 import s_barlaImage from "./components/s_barla.jpg";
 import r_doshiImage from "./components/r_doshi.jpeg";
 import k_vedereImage from "./components/k_vedere.jpg";
@@ -393,8 +392,9 @@ const AboutPage = () => {
       </motion.div>
 
       {/* Footer */}
-      <footer className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark px-3">
-        © 2025 TrueRate. All rights reserved.
+      <footer className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark px-0"
+        style={{ position: "fixed", bottom: 0, left: 0, right: 0, width: "100vw" }}>
+        &copy; 2025 TrueRate. All rights reserved.
       </footer>
     </motion.div>
   );
