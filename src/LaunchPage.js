@@ -94,7 +94,7 @@ const LaunchPage = () => {
           className="position-absolute top-0 start-0 w-100 h-100"
           style={{ backgroundColor: "rgba(36, 26, 144, 0.5)", zIndex: 1 }}
         />
-        <div className="container position-relative" style={{ zIndex: 2, paddingTop: "20vh" }}>
+        <div className="container position-relative" style={{ zIndex: 2, paddingTop: "26vh" }}>
           <h1
             className="display-3 fw-bold mb-3"
             style={{ fontFamily: "Outfit, sans-serif", color: "#fff" }}
