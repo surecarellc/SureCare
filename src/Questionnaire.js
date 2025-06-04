@@ -32,6 +32,7 @@ const Questionnaire = () => {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   }, [messages]);
 
+  //comment
   const [coords, setCoords] = useState({ lat: null, lng: null }); // From device geolocation
   const [geoError, setGeoError] = useState(null);
   const [showGeoErrorBanner, setShowGeoErrorBanner] = useState(false);
@@ -326,7 +327,7 @@ const Questionnaire = () => {
           {isProcessingLocation ? "Searching..." : "Search For Hospitals Near Me"}
         </button>
       </div>
-
+          
       {/* ---------- Footer ---------- */}
       <motion.footer
         initial={{ opacity: 0, y: 50 }}
