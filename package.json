@@ -4,10 +4,11 @@
   "private": true,
   "dependencies": {
     "@google/genai": "^1.0.0",
+    "@react-google-maps/api": "^2.20.6",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
-    "bootstrap": "^5.3.3",
+    "bootstrap": "^5.3.6",
     "framer-motion": "^12.4.7",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.9",
