@@ -21,7 +21,7 @@ const Questionnaire = () => {
   const [details, setDetails] = useState("");
   const [, setSubmitted] = useState(false);
   const [address, setAddress] = useState(""); // This will now be used by the popup
-  const [showAddressPopup, setShowAddressPopup] = useState(false); // For popup visibility
+  const [showAddressPopup, setShowAddressPopup] = useState(true); // For popup visibility, now true by default
 
   const [messages, setMessages] = useState(() => {
     try {
@@ -33,33 +33,15 @@ const Questionnaire = () => {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   }, [messages]);
 
-  // comment
   const [coords, setCoords] = useState({ lat: null, lng: null });
   const [geoError, setGeoError] = useState(null);
   const [showGeoErrorBanner, setShowGeoErrorBanner] = useState(false);
   const geoErrorTimeoutRef = useRef(null);
   const [isProcessingLocation, setIsProcessingLocation] = useState(false);
 
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setGeoError("Geolocation not supported by your browser.");
-      return;
-    }
-    const geoWatchId = navigator.geolocation.watchPosition(
-      (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setGeoError(null);
-        setShowGeoErrorBanner(false);
-        if (geoErrorTimeoutRef.current) clearTimeout(geoErrorTimeoutRef.current);
-      },
-      (err) => {
-        setGeoError(err.message);
-        setCoords({ lat: null, lng: null });
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-    return () => navigator.geolocation.clearWatch(geoWatchId);
-  }, []);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceTimerRef = useRef(null);
 
   const chatRef = useRef(null);
   useEffect(() => {
@@ -159,6 +141,64 @@ const Questionnaire = () => {
     }
   };
 
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setGeoError("Geolocation not supported by your browser.");
+      return;
+    }
+    const geoWatchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGeoError(null);
+        setShowGeoErrorBanner(false);
+        if (geoErrorTimeoutRef.current) clearTimeout(geoErrorTimeoutRef.current);
+      },
+      (err) => {
+        setGeoError(err.message);
+        setCoords({ lat: null, lng: null });
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+    return () => navigator.geolocation.clearWatch(geoWatchId);
+  }, []);
+
+  // Fetch address suggestions from Nominatim with debounce and sorting by relevance
+  const fetchAddressSuggestions = async (query) => {
+    if (!query || query.trim() === "") {
+      setAddressSuggestions([]);
+      return;
+    }
+    const encoded = encodeURIComponent(query);
+    const url = `https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&addressdetails=1&limit=5&countrycodes=us`;
+    try {
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'SureCare/1.0 (contact@surecare.com)' }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      // Only include suggestions that have a house_number and road (i.e., full street address)
+      const filteredData = data.filter(s => {
+        const addr = s.address || {};
+        return addr.house_number && addr.road;
+      });
+      // Sort suggestions by importance (higher importance means closer match)
+      const sortedData = filteredData.sort((a, b) => b.importance - a.importance);
+      setAddressSuggestions(sortedData);
+    } catch {
+      setAddressSuggestions([]);
+    }
+  };
+
+  // Debounced version of fetchAddressSuggestions
+  const debouncedFetchSuggestions = (query) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      fetchAddressSuggestions(query);
+    }, 300); // 300ms debounce
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -196,6 +236,7 @@ const Questionnaire = () => {
           height: `calc(100vh - ${TOP_PADDING}rem - ${BOTTOM_SPACE}rem)`,
           overflowY: "auto",
           padding: "1rem",
+          paddingBottom: "2rem", // Tighter space
           scrollbarGutter: "stable",
         }}
         className="d-flex flex-column align-items-center"
@@ -280,7 +321,11 @@ const Questionnaire = () => {
               <h4 style={{ marginTop: 0, marginBottom: "1.5rem", color: "#333" }}>Enter Your Address</h4>
               <textarea
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                onChange={e => {
+                  setAddress(e.target.value);
+                  debouncedFetchSuggestions(e.target.value);
+                  setShowSuggestions(true);
+                }}
                 placeholder="E.g., 1600 Amphitheatre Parkway, Mountain View, CA 94043"
                 rows={3}
                 style={{
@@ -289,7 +334,44 @@ const Questionnaire = () => {
                   resize: "none", boxSizing: "border-box"
                 }}
                 disabled={isProcessingLocation}
+                onFocus={() => { if (address) setShowSuggestions(true); }}
+                onBlur={() => setShowSuggestions(false)}
               />
+              {showSuggestions && addressSuggestions.length > 0 && (
+                <div style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: "calc(100% + 4px)",
+                  background: "#fff",
+                  border: "1px solid #ced4da",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  zIndex: 3000,
+                  maxHeight: "180px",
+                  overflowY: "auto",
+                  marginTop: "-1.5rem"
+                }}>
+                  {addressSuggestions.map((s, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        padding: "0.75rem 1rem",
+                        cursor: "pointer",
+                        borderBottom: idx !== addressSuggestions.length - 1 ? "1px solid #eee" : "none",
+                        fontSize: "1rem"
+                      }}
+                      onMouseDown={() => {
+                        setAddress(s.display_name);
+                        setShowSuggestions(false);
+                        setAddressSuggestions([]);
+                      }}
+                    >
+                      {s.display_name}
+                    </div>
+                  ))}
+                </div>
+              )}
               <button
                 onClick={() => setShowAddressPopup(false)}
                 style={{
@@ -322,12 +404,12 @@ const Questionnaire = () => {
           paddingRight: "1rem",
           display: "flex",
           flexDirection: "column",
-          gap: "0.75rem", // Adjusted gap for better spacing
+          gap: "1rem", // Increased gap for better spacing
           zIndex: 100,
           boxSizing: "border-box",
         }}
       >
-        <div className="input-group" style={{ background: "#f8f9fa", border: "2px solid gray", borderRadius: 20, overflow: "hidden", padding: "0.5rem" }}>
+        <div className="input-group" style={{ background: "#f8f9fa", border: "2px solid #ced4da", borderRadius: 20, overflow: "hidden", padding: "0.5rem", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
           <textarea
             className="form-control border-0 bg-transparent"
             placeholder="Type your symptoms or preferences…" rows={1}
@@ -368,6 +450,7 @@ const Questionnaire = () => {
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
           }}
           onMouseOver={e => { if (!isProcessingLocation) { e.currentTarget.style.background = "#5a6268"; e.currentTarget.style.borderColor = "#545b62"; }}}
           onMouseOut={e => { if (!isProcessingLocation) { e.currentTarget.style.background = "#6c757d"; e.currentTarget.style.borderColor = "#6c757d"; }}}
@@ -384,10 +467,10 @@ const Questionnaire = () => {
             width: "100%", background: isSearchDisabled ? "#ccc" : "#241A90",
             color: "#fff", padding: "0.75rem", borderRadius: 12, border: "2px solid",
             borderColor: isSearchDisabled ? "#ccc" : "#241A90",
-            // marginTop: "0.5rem", // gap property on parent handles this
             cursor: isSearchDisabled ? "not-allowed" : "pointer",
             transition: "background-color 0.2s ease, border-color 0.2s ease",
             fontWeight: "bold",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
           }}
           onMouseOver={e => { if (!isSearchDisabled) { e.currentTarget.style.background = "#3b2dbb"; e.currentTarget.style.borderColor = "#3b2dbb"; } }}
           onMouseOut={e => { if (!isSearchDisabled) { e.currentTarget.style.background = "#241A90"; e.currentTarget.style.borderColor = "#241A90"; } }}
