@@ -1,10 +1,9 @@
 import React, { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { useNavigation } from "./utils/goToFunctions.js";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 const HelpPage = () => {
-  const { goToAboutPage, goToSignInPage, goToLaunchPage } = useNavigation();
-
   // State for FAQ collapse
   const [openFaq, setOpenFaq] = useState(null);
   const toggleFaq = (index) => {
@@ -38,9 +37,9 @@ const HelpPage = () => {
   const helpRef = useRef(null);
   const faqRef = useRef(null);
   const contactRef = useRef(null);
-  const helpInView = useInView(helpRef, { amount: 0.3 }); // Removed once: true
-  const faqInView = useInView(faqRef, { amount: 0.3 }); // Removed once: true
-  const contactInView = useInView(contactRef, { amount: 0.3 }); // Removed once: true
+  const helpInView = useInView(helpRef, { amount: 0.3 });
+  const faqInView = useInView(faqRef, { amount: 0.3 });
+  const contactInView = useInView(contactRef, { amount: 0.3 });
 
   // Animation variants
   const sectionVariants = {
@@ -74,58 +73,8 @@ const HelpPage = () => {
   ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -100 }}
-      transition={{ duration: 0.5 }}
-      className="d-flex flex-column min-vh-100 align-items-center text-center p-4"
-    >
-      {/* Navbar */}
-      <nav
-        className="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom border-dark px-0"
-        style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 1000 }}
-      >
-        <div className="container-fluid d-flex justify-content-between">
-          <button
-            onClick={goToLaunchPage}
-            style={{
-              fontSize: "clamp(1.5rem, 4vw, 2rem)",
-              fontWeight: "700",
-              cursor: "pointer",
-              background: "none",
-              border: "none",
-            }}
-            aria-label="Go to Home Page"
-          >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
-          </button>
-          <div className="d-flex">
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToAboutPage}
-              aria-label="Go to About Page"
-            >
-              About
-            </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              aria-label="Stay on Help Page"
-            >
-              Help
-            </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToSignInPage}
-              aria-label="Go to Sign In Page"
-            >
-              Sign In
-            </button>
-          </div>
-        </div>
-      </nav>
+    <div className="d-flex flex-column min-vh-100 align-items-center text-center p-4">
+      <Navbar />
 
       {/* Help Section */}
       <motion.div
@@ -362,11 +311,8 @@ const HelpPage = () => {
         </div>
       </motion.section>
 
-      {/* Footer */}
-      <footer className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark px-0">
-        © 2025 SureCare. All rights reserved.
-      </footer>
-    </motion.div>
+      <Footer />
+    </div>
   );
 };
 

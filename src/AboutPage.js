@@ -1,93 +1,42 @@
-import React from "react";
-import { useNavigation } from "./utils/goToFunctions.js";
+import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import s_barlaImage from "./components/s_barla.jpg";
 import r_doshiImage from "./components/r_doshi.jpeg";
 import k_vedereImage from "./components/k_vedere.jpg";
 import a_khatwaniImage from "./components/a_khatwani.jpg";
 import a_ellisImage from "./components/a_ellis.jpg";
-import { useRef } from "react";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 const AboutPage = () => {
-  const { goToSignInPage, goToHelpPage, goToLaunchPage } = useNavigation();
-
-  // Refs for each section to detect when they are in view
+  // Refs for scroll animations
   const whoWeAreRef = useRef(null);
   const teamRef = useRef(null);
   const missionRef = useRef(null);
 
   // Check if sections are in view
-  const whoWeAreInView = useInView(whoWeAreRef, { once: false, amount: 0.3 });
-  const teamInView = useInView(teamRef, { once: false, amount: 0.3 });
-  const missionInView = useInView(missionRef, { once: false, amount: 0.3 });
+  const whoWeAreInView = useInView(whoWeAreRef, { amount: 0.3 });
+  const teamInView = useInView(teamRef, { amount: 0.3 });
+  const missionInView = useInView(missionRef, { amount: 0.3 });
 
-  // Animation variants for sections
+  // Animation variants
   const sectionVariants = {
     hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
   };
 
   // Animation variants for team member cards
   const cardVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
+    hidden: { opacity: 0, scale: 0.95 },
     visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" } },
-    hover: { 
-      scale: 1.05, 
-      boxShadow: "0 8px 16px rgba(0,0,0,0.2)", 
-      outline: "3px solid #241A90",
-      transition: { duration: 0.3 } 
-    },
+    hover: { scale: 1.02, boxShadow: "0 4px 10px rgba(0,0,0,0.2)" },
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -100 }}
-      transition={{ duration: 0.5 }}
-      className="d-flex flex-column min-vh-100 align-items-center text-center p-0"
+    <div
+      className="d-flex flex-column min-vh-100 align-items-center text-center p-4"
     >
-      {/* Navbar */}
-      <nav
-        className="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom border-dark px-3"
-        style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 1000 }}
-      >
-        <div className="container-fluid">
-          <button
-            onClick={goToLaunchPage}
-            style={{
-              fontSize: "2rem",
-              fontWeight: "700",
-              cursor: "pointer",
-              background: "none",
-              border: "none",
-            }}
-          >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
-          </button>
-          <div className="d-flex">
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            >
-              About
-            </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToHelpPage}
-            >
-              Help
-            </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToSignInPage}
-            >
-              Sign In
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Who We Are Section */}
       <motion.div
@@ -109,7 +58,7 @@ const AboutPage = () => {
             SureCare is a healthcare technology company dedicated to bringing transparency,
             affordability, and accessibility to medical services in the United States. We believe
             that every American deserves to know the real cost of healthcare before stepping into a
-            doctor’s office or hospital. Our mission is to empower consumers with accurate pricing,
+            doctor's office or hospital. Our mission is to empower consumers with accurate pricing,
             provider quality insights, and expert guidance to help them make informed medical
             decisions.
           </p>
@@ -320,7 +269,7 @@ const AboutPage = () => {
                       marginBottom: "0",
                     }}
                   >
-                    My passion lies in building products that make a meaningful impact on people’s lives. At SureCare, I strive to turn that passion into reality by applying my skills in UI/UX design, React.js, and Python to develop thoughtful, user-focused solutions.
+                    My passion lies in building products that make a meaningful impact on people's lives. At SureCare, I strive to turn that passion into reality by applying my skills in UI/UX design, React.js, and Python to develop thoughtful, user-focused solutions.
                   </p>
                 </div>
               </motion.div>
@@ -397,12 +346,8 @@ const AboutPage = () => {
         </div>
       </motion.div>
 
-      {/* Footer */}
-      <footer className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark px-0"
-        style={{ position: "bottom", bottom: 0, left: 0, right: 0, width: "100vw" }}>
-        &copy; 2025 SureCare. All rights reserved.
-      </footer>
-    </motion.div>
+      <Footer />
+    </div>
   );
 };
 
