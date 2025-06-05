@@ -399,7 +399,7 @@ const AboutPage = () => {
 
       {/* Footer */}
       <footer className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark px-0"
-        style={{ position: "fixed", bottom: 0, left: 0, right: 0, width: "100vw" }}>
+        style={{ position: "bottom", bottom: 0, left: 0, right: 0, width: "100vw" }}>
         &copy; 2025 SureCare. All rights reserved.
       </footer>
     </motion.div>
