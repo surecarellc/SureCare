@@ -1,38 +1,23 @@
 import React from "react";
 import { motion } from "framer-motion";
 import launchImage from "./components/launch_image.png";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import { useNavigation } from "./utils/goToFunctions.js";
 
 const LaunchPage = () => {
-  const {
-    goToAboutPage,
-    goToQuestionnairePage,
-    goToSignInPage,
-    goToHelpPage,
-    goToLaunchPage,
-  } = useNavigation();
+  const { goToQuestionnairePage } = useNavigation();
 
-  // Handle navigation to top of About Page
-  const handleAboutNavigation = () => {
-    goToAboutPage();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // Animation variants for hero section
+  // Animation variants
   const heroVariants = {
-    hidden: { opacity: 0, y: 50 },
+    hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
   };
 
-  // Animation variants for feature cards
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" } },
-    hover: {
-      scale: 1.05,
-      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-      transition: { duration: 0.3 },
-    },
+  const featureVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+    hover: { scale: 1.05, transition: { duration: 0.3 } },
   };
 
   return (
@@ -40,53 +25,9 @@ const LaunchPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="d-flex flex-column min-vh-100"
+      className="d-flex flex-column min-vh-100 align-items-center text-center p-4"
     >
-      {/* Navbar */}
-      <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div className="container-fluid">
-          <button
-            onClick={goToLaunchPage}
-            style={{
-              fontSize: "clamp(1.5rem, 4vw, 2rem)",
-              fontWeight: "700",
-              cursor: "pointer",
-              background: "none",
-              border: "none",
-            }}
-            aria-label="Go to Home Page"
-          >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
-          </button>
-          <div className="d-flex">
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToAboutPage}
-              aria-label="Go to About Page"
-            >
-              About
-            </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToHelpPage}
-              aria-label="Go to Help Page"
-            >
-              Help
-            </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToSignInPage}
-              aria-label="Go to Sign In Page"
-            >
-              Sign In
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
+      <Navbar />
       <motion.section
         variants={heroVariants}
         initial="hidden"
@@ -105,29 +46,42 @@ const LaunchPage = () => {
           className="position-absolute top-0 start-0 w-100 h-100"
           style={{ backgroundColor: "rgba(36, 26, 144, 0.5)", zIndex: 1 }}
         ></div>
-        <div className="container position-relative" style={{ zIndex: 2, paddingTop: "26vh" }}>
+        <div className="position-relative z-2 d-flex flex-column justify-content-center align-items-center h-100">
           <h1
-            className="display-3 fw-bold mb-3"
-            style={{ fontFamily: "Outfit, sans-serif", color: "#fff", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
+            className="display-3 fw-bold mb-4"
+            style={{
+              fontFamily: "Outfit, sans-serif",
+              fontSize: "clamp(2.5rem, 8vw, 4.5rem)",
+            }}
           >
-            Find the Right Healthcare for You
+            <span style={{ color: "#FFFFFF" }}>Find the Best</span>
+            <br />
+            <span style={{ color: "#3AADA4" }}>Healthcare Options</span>
           </h1>
           <p
-            className="lead mb-4"
-            style={{ fontFamily: "Outfit, sans-serif", fontWeight: "300", color: "#E0E0E0", fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
+            className="lead mb-5"
+            style={{
+              fontFamily: "Outfit, sans-serif",
+              fontWeight: "300",
+              maxWidth: "800px",
+              fontSize: "clamp(1.25rem, 3vw, 1.5rem)",
+            }}
           >
-            Discover transparent pricing, quality providers, and personalized care with SureCare.
+            Compare prices, find top-rated providers, and get expert guidance for your healthcare needs.
           </p>
           <motion.button
             whileHover={{ scale: 1.1, backgroundColor: "#241A90" }}
             whileTap={{ scale: 0.95 }}
-            className="btn mt-3 px-5 py-3 rounded-pill shadow"
+            className="btn btn-lg px-5 py-3"
             style={{
               backgroundColor: "#3AADA4",
-              color: "#fff",
+              color: "white",
               fontFamily: "Outfit, sans-serif",
-              fontSize: "1.2rem",
+              fontWeight: "600",
+              fontSize: "clamp(1rem, 2vw, 1.25rem)",
               border: "none",
+              borderRadius: "8px",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
             }}
             onClick={goToQuestionnairePage}
             aria-label="Get Started"
@@ -137,7 +91,6 @@ const LaunchPage = () => {
         </div>
       </motion.section>
 
-      {/* Features Section */}
       <section className="py-5 bg-light">
         <div className="container">
           <motion.button
@@ -152,15 +105,13 @@ const LaunchPage = () => {
             }}
             whileHover={{ scale: 1.05, color: "#3AADA4", transition: { duration: 0.3 } }}
             whileTap={{ scale: 0.95, transition: { duration: 0.3 } }}
-            onClick={handleAboutNavigation}
-            aria-label="Navigate to About Page"
           >
             Why Choose SureCare?
           </motion.button>
           <div className="row justify-content-between">
             <motion.div
               className="col-12 col-md-4"
-              variants={cardVariants}
+              variants={featureVariants}
               initial="hidden"
               animate="visible"
               whileHover="hover"
@@ -181,9 +132,10 @@ const LaunchPage = () => {
                 </div>
               </div>
             </motion.div>
+
             <motion.div
               className="col-12 col-md-4"
-              variants={cardVariants}
+              variants={featureVariants}
               initial="hidden"
               animate="visible"
               whileHover="hover"
@@ -204,9 +156,10 @@ const LaunchPage = () => {
                 </div>
               </div>
             </motion.div>
+
             <motion.div
               className="col-12 col-md-4"
-              variants={cardVariants}
+              variants={featureVariants}
               initial="hidden"
               animate="visible"
               whileHover="hover"
@@ -231,10 +184,7 @@ const LaunchPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark">
-        © 2025 SureCare. All rights reserved.
-      </footer>
+      <Footer />
     </motion.div>
   );
 };
