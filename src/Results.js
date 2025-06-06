@@ -1,10 +1,11 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaTimes } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { useNavigation } from "./utils/goToFunctions.js";
 import { geocodeAddress } from "./services/userService";
+import LoadingPage from "./components/LoadingPage";
 
 const mapContainerStyle = {
   width: "100%",
@@ -48,6 +49,7 @@ const Results = () => {
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+    libraries: ["places"],
   });
 
   const mapRef = useRef(null);
@@ -69,6 +71,16 @@ const Results = () => {
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceTimerRef = useRef(null);
+
+  const [showLoading, setShowLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredResults = useMemo(() => {
     if (allResults.length === 0) return [];
@@ -153,8 +165,18 @@ const Results = () => {
     }, 300); // 300ms debounce
   };
 
-  if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading Maps...</div>;
+  if (loadError) return (
+    <div className="d-flex justify-content-center align-items-center min-vh-100">
+      <div className="text-center">
+        <h3 className="text-danger mb-3">Error loading maps</h3>
+        <p>Please try refreshing the page</p>
+      </div>
+    </div>
+  );
+  
+  if (!isLoaded || showLoading) {
+    return <LoadingPage />;
+  }
 
   return (
     <motion.div

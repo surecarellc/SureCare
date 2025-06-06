@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { FaArrowRight, FaTimes } from "react-icons/fa"; // Added FaTimes
 import { useNavigate } from "react-router-dom";
@@ -6,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { motion } from "framer-motion";
 import { getLocationPrices, geocodeAddress } from "./services/userService"; // Assuming geocodeAddress is in this file
+import LoadingPage from "./components/LoadingPage";
 
 const STORAGE_KEY = "chatMessages";
 const TOP_PADDING = 5.5;
@@ -99,12 +99,13 @@ const Questionnaire = () => {
 
   const handleSearchClick = async () => {
     setIsProcessingLocation(true);
+    const startTime = Date.now();
 
     let searchLat = null;
     let searchLng = null;
     let searchAddressString = "Unknown Location";
 
-    if (isAddressEntered) { // Priority 1: Manually entered address (from popup)
+    if (isAddressEntered) {
       try {
         console.log(`Attempting to geocode user-entered address: "${address}"`);
         const geocodedData = await geocodeAddress(address);
@@ -124,7 +125,7 @@ const Questionnaire = () => {
         setIsProcessingLocation(false);
         return;
       }
-    } else if (isDeviceGeoAvailable) { // Priority 2: Device geolocation
+    } else if (isDeviceGeoAvailable) {
       console.log("Using device geolocation.");
       searchLat = coords.lat;
       searchLng = coords.lng;
@@ -138,6 +139,15 @@ const Questionnaire = () => {
     try {
       console.log(`Fetching hospitals for: ${searchAddressString} (Lat: ${searchLat}, Lng: ${searchLng})`);
       const hospitals = await getLocationPrices(searchLat, searchLng, 5);
+      
+      // Calculate remaining time to ensure minimum 2 second display
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 2000 - elapsedTime);
+      
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      }
+      
       navigate("/results", { state: { results: hospitals, searchLocation: { lat: searchLat, lng: searchLng, address: searchAddressString } } });
     } catch (e) {
       console.error("Failed to fetch hospital data:", e);
@@ -205,6 +215,10 @@ const Questionnaire = () => {
     }, 300); // 300ms debounce
   };
 
+  if (isProcessingLocation) {
+    return <LoadingPage />;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -260,6 +274,19 @@ const Questionnaire = () => {
               }}
             >
               Location Error: {geoError}. Please enable location services or enter an address manually.
+            </div>
+          )}
+          {isProcessingLocation && (
+            <div className="d-flex justify-content-start mb-2">
+              <div
+                style={{
+                  background: "#e9ecef",
+                  borderRadius: 12,
+                  padding: "0.5rem 1rem",
+                }}
+              >
+                <LoadingPage />
+              </div>
             </div>
           )}
         </div>
@@ -451,7 +478,13 @@ const Questionnaire = () => {
             onMouseOut={e => { if (!isSearchDisabled) { e.currentTarget.style.background = "#241A90"; e.currentTarget.style.borderColor = "#241A90"; } }}
             onClick={handleSearchClick}
           >
-            {isProcessingLocation ? "Searching..." : "Search For Hospitals Near Me"}
+            {isProcessingLocation ? (
+              <div className="d-flex align-items-center justify-content-center">
+                <LoadingPage />
+              </div>
+            ) : (
+              "Search For Hospitals Near Me"
+            )}
           </button>
         </div>
       </div>

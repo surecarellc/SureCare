@@ -14,12 +14,6 @@ const LaunchPage = () => {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
   };
 
-  const featureVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-    hover: { scale: 1.05, transition: { duration: 0.3 } },
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -91,7 +85,7 @@ const LaunchPage = () => {
         </div>
       </motion.section>
 
-      <section className="py-5 bg-light">
+      <section className="py-5 bg-white">
         <div className="container">
           <motion.button
             className="d-block mx-auto mb-5 bg-transparent border-0"
@@ -103,79 +97,36 @@ const LaunchPage = () => {
               padding: "0.25rem 0.75rem",
               cursor: "pointer",
             }}
-            whileHover={{ scale: 1.05, color: "#3AADA4", transition: { duration: 0.3 } }}
-            whileTap={{ scale: 0.95, transition: { duration: 0.3 } }}
           >
             Why Choose SureCare?
           </motion.button>
-          <div className="row justify-content-between">
-            <motion.div
-              className="col-12 col-md-4"
-              variants={featureVariants}
-              initial="hidden"
-              animate="visible"
-              whileHover="hover"
-              style={{ overflow: "hidden", maxWidth: "28%" }}
-            >
-              <div className="card h-100 border-0 shadow-sm text-center">
-                <div className="card-body">
-                  <i className="fas fa-dollar-sign fa-3x mb-3" style={{ color: "#3AADA4" }}></i>
-                  <h5 className="card-title" style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700" }}>
-                    Transparent Pricing
-                  </h5>
-                  <p
-                    className="card-text"
-                    style={{ fontFamily: "Outfit, sans-serif", fontWeight: "300" }}
-                  >
-                    Know the real cost of healthcare before you choose, with clear and accurate pricing.
+          <div className="row justify-content-center">
+            <motion.div className="col-md-4 mb-4" whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
+              <div className="card h-100 border-0 shadow-sm" style={{ backgroundColor: "#3AADA4" }}>
+                <div className="card-body text-center">
+                  <h3 className="card-title h5 mb-3 text-white">Transparent Pricing</h3>
+                  <p className="card-text text-white">
+                    Get real-time price comparisons for medical procedures across hospitals in your area.
                   </p>
                 </div>
               </div>
             </motion.div>
-
-            <motion.div
-              className="col-12 col-md-4"
-              variants={featureVariants}
-              initial="hidden"
-              animate="visible"
-              whileHover="hover"
-              style={{ overflow: "hidden", maxWidth: "28%" }}
-            >
-              <div className="card h-100 border-0 shadow-sm text-center">
-                <div className="card-body">
-                  <i className="fas fa-stethoscope fa-3x mb-3" style={{ color: "#3AADA4" }}></i>
-                  <h5 className="card-title" style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700" }}>
-                    Quality Providers
-                  </h5>
-                  <p
-                    className="card-text"
-                    style={{ fontFamily: "Outfit, sans-serif", fontWeight: "300" }}
-                  >
-                    Access top-rated providers tailored to your needs.
+            <motion.div className="col-md-4 mb-4" whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
+              <div className="card h-100 border-0 shadow-sm" style={{ backgroundColor: "#3AADA4" }}>
+                <div className="card-body text-center">
+                  <h3 className="card-title h5 mb-3 text-white">Personalized Care</h3>
+                  <p className="card-text text-white">
+                    Receive tailored recommendations based on your specific medical needs and preferences.
                   </p>
                 </div>
               </div>
             </motion.div>
-
-            <motion.div
-              className="col-12 col-md-4"
-              variants={featureVariants}
-              initial="hidden"
-              animate="visible"
-              whileHover="hover"
-              style={{ overflow: "hidden", maxWidth: "28%" }}
-            >
-              <div className="card h-100 border-0 shadow-sm text-center">
-                <div className="card-body">
-                  <i className="fas fa-user-md fa-3x mb-3" style={{ color: "#3AADA4" }}></i>
-                  <h5 className="card-title" style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700" }}>
-                    Personalized Care
-                  </h5>
-                  <p
-                    className="card-text"
-                    style={{ fontFamily: "Outfit, sans-serif", fontWeight: "300" }}
-                  >
-                    Get expert guidance and telehealth options for smarter healthcare decisions.
+            <motion.div className="col-md-4 mb-4" whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
+              <div className="card h-100 border-0 shadow-sm" style={{ backgroundColor: "#3AADA4" }}>
+                <div className="card-body text-center">
+                  <h3 className="card-title h5 mb-3 text-white">Quality Assurance</h3>
+                  <p className="card-text text-white">
+                    Access verified reviews and ratings to make informed decisions about your healthcare.
                   </p>
                 </div>
               </div>
