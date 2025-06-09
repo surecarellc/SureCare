@@ -1,6 +1,6 @@
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaMapMarkerAlt } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { useNavigation } from "./utils/goToFunctions.js";
@@ -70,8 +70,8 @@ const Results = () => {
   const [isProcessingLocation, setIsProcessingLocation] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
   const debounceTimerRef = useRef(null);
-
   const [showLoading, setShowLoading] = useState(true);
 
   useEffect(() => {
@@ -108,7 +108,15 @@ const Results = () => {
     }
     setIsProcessingLocation(true);
     try {
-      const geocodedData = await geocodeAddress(newAddress);
+      let geocodedData;
+      if (selectedSuggestion && newAddress === selectedSuggestion.short_display_name) {
+        geocodedData = {
+          lat: parseFloat(selectedSuggestion.lat),
+          lng: parseFloat(selectedSuggestion.lon),
+        };
+      } else {
+        geocodedData = await geocodeAddress(newAddress);
+      }
       if (geocodedData && typeof geocodedData.lat === "number" && typeof geocodedData.lng === "number") {
         setSearchLocation({
           lat: geocodedData.lat,
@@ -117,6 +125,8 @@ const Results = () => {
         });
         setShowAddressPopup(false);
         setNewAddress("");
+        setAddressSuggestions([]);
+        setSelectedSuggestion(null);
       } else {
         alert(`Could not find a precise location for the address: "${newAddress}". Please check the address.`);
       }
@@ -128,7 +138,6 @@ const Results = () => {
     }
   };
 
-  // Fetch address suggestions from Nominatim with debounce and sorting by relevance
   const fetchAddressSuggestions = async (query) => {
     if (!query || query.trim() === "") {
       setAddressSuggestions([]);
@@ -138,31 +147,36 @@ const Results = () => {
     const url = `https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&addressdetails=1&limit=5&countrycodes=us`;
     try {
       const res = await fetch(url, {
-        headers: { 'User-Agent': 'SureCare/1.0 (contact@surecare.com)' }
+        headers: { "User-Agent": "SureCare/1.0 (contact@surecare.com)" },
       });
       if (!res.ok) return;
       const data = await res.json();
-      // Only include suggestions that have a house_number and road (i.e., full street address)
-      const filteredData = data.filter(s => {
+      const filteredData = data.filter((s) => {
         const addr = s.address || {};
         return addr.house_number && addr.road;
       });
-      // Sort suggestions by importance (higher importance means closer match)
-      const sortedData = filteredData.sort((a, b) => b.importance - a.importance);
-      setAddressSuggestions(sortedData);
+      const suggestionsWithShortName = filteredData.map((s) => {
+        const addr = s.address;
+        const street = [addr.house_number, addr.road].filter(Boolean).join(" ");
+        const city = addr.city || addr.town || addr.village;
+        const state = addr.state;
+        const postcode = addr.postcode;
+        const short_display_name = [street, city, state, postcode].filter(Boolean).join(", ");
+        return { ...s, short_display_name };
+      });
+      setAddressSuggestions(suggestionsWithShortName);
     } catch {
       setAddressSuggestions([]);
     }
   };
 
-  // Debounced version of fetchAddressSuggestions
   const debouncedFetchSuggestions = (query) => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
     debounceTimerRef.current = setTimeout(() => {
       fetchAddressSuggestions(query);
-    }, 300); // 300ms debounce
+    }, 300);
   };
 
   if (loadError) return (
@@ -173,7 +187,7 @@ const Results = () => {
       </div>
     </div>
   );
-  
+
   if (!isLoaded || showLoading) {
     return <LoadingPage />;
   }
@@ -407,7 +421,7 @@ const Results = () => {
               left: 0,
               width: "100%",
               height: "100%",
-              background: "rgba(0,0,0,0.6)",
+              background: "rgba(0, 0, 0, 0.5)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -421,14 +435,16 @@ const Results = () => {
               exit={{ scale: 0.7, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               style={{
-                background: "white",
-                padding: "2rem",
-                borderRadius: "12px",
-                minWidth: "300px",
-                maxWidth: "500px",
+                background: "#fff",
+                padding: "1.75rem 1.5rem 1.25rem",
+                borderRadius: "16px",
                 width: "90%",
-                boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                maxWidth: "480px",
+                boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
                 position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -441,82 +457,122 @@ const Results = () => {
                   background: "none",
                   border: "none",
                   fontSize: "1.5rem",
+                  color: "#666",
                   cursor: "pointer",
-                  color: "#6c757d",
                 }}
-                aria-label="Close address popup"
+                aria-label="Close popup"
               >
                 <FaTimes />
               </button>
-              <h4 style={{ marginTop: 0, marginBottom: "1.5rem", color: "#333" }}>Enter Your Address</h4>
-              <div style={{ position: 'relative' }}>
-                <textarea
+              <h2 style={{ margin: 0, marginBottom: "0.75rem", fontSize: "1.5rem", fontWeight: "600", color: "#212529", textAlign: "center" }}>
+                Where are you located?
+              </h2>
+              <p style={{ marginTop: 0, marginBottom: "1.25rem", fontSize: "0.95rem", color: "#6c757d", textAlign: "center" }}>
+                Enter your address so we can show hospitals near you.
+              </p>
+              <div style={{ position: "relative", width: "100%" }}>
+                <FaMapMarkerAlt
+                  size={18}
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "0.85rem",
+                    transform: "translateY(-50%)",
+                    color: "#6c757d",
+                    pointerEvents: "none",
+                  }}
+                />
+                <input
+                  type="text"
                   value={newAddress}
-                  onChange={e => {
+                  onChange={(e) => {
                     setNewAddress(e.target.value);
                     debouncedFetchSuggestions(e.target.value);
                     setShowSuggestions(true);
                   }}
-                  placeholder="E.g., 1600 Amphitheatre Parkway, Mountain View, CA 94043"
-                  rows={3}
+                  placeholder="E.g., 123 Main St, Austin, TX"
                   style={{
-                    width: "100%", marginBottom: "1.5rem", padding: "0.75rem",
-                    borderRadius: "8px", border: "1px solid #ced4da", fontSize: "1rem",
-                    resize: "none", boxSizing: "border-box"
+                    width: "100%",
+                    padding: "0.75rem 1rem 0.75rem 2.5rem",
+                    borderRadius: "8px",
+                    border: "1px solid #ced4da",
+                    fontSize: "1rem",
+                    outline: "none",
+                    boxSizing: "border-box",
                   }}
                   disabled={isProcessingLocation}
-                  onFocus={() => { if (newAddress) setShowSuggestions(true); }}
-                  onBlur={() => setShowSuggestions(false)}
+                  onFocus={() => {
+                    if (newAddress) setShowSuggestions(true);
+                  }}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
                 />
                 {showSuggestions && addressSuggestions.length > 0 && (
-                  <div style={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    top: "calc(100% + 4px)",
-                    background: "#fff",
-                    border: "1px solid #ced4da",
-                    borderRadius: "8px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                    zIndex: 3000,
-                    maxHeight: "180px",
-                    overflowY: "auto",
-                    marginTop: "-1.5rem"
-                  }}>
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      right: 0,
+                      top: "calc(100% + 8px)",
+                      background: "#fff",
+                      border: "1px solid #ddd",
+                      borderRadius: "6px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      zIndex: 3000,
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                      marginTop: "0.5rem",
+                    }}
+                  >
                     {addressSuggestions.map((s, idx) => (
                       <div
                         key={idx}
                         style={{
-                          padding: "0.75rem 1rem",
+                          padding: "0.875rem 1rem",
                           cursor: "pointer",
                           borderBottom: idx !== addressSuggestions.length - 1 ? "1px solid #eee" : "none",
-                          fontSize: "1rem"
+                          fontSize: "1rem",
+                          color: "#333",
+                          background: "#fff",
+                          transition: "background 0.2s ease",
+                          textAlign: "left",
                         }}
                         onMouseDown={() => {
-                          setNewAddress(s.display_name);
+                          setNewAddress(s.short_display_name);
+                          setSelectedSuggestion(s);
                           setShowSuggestions(false);
                           setAddressSuggestions([]);
                         }}
+                        onMouseOver={(e) => (e.currentTarget.style.background = "#f0f0f0")}
+                        onMouseOut={(e) => (e.currentTarget.style.background = "#fff")}
                       >
-                        {s.display_name}
+                        {s.short_display_name}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-              <button
-                onClick={handleAddressSubmit}
-                style={{
-                  width: "100%", background: "#241A90", color: "#fff",
-                  padding: "0.75rem", borderRadius: "8px", border: "none",
-                  fontSize: "1rem", cursor: "pointer",
-                }}
-                onMouseOver={e => (e.currentTarget.style.background = "#3b2dbb")}
-                onMouseOut={e => (e.currentTarget.style.background = "#241A90")}
-                disabled={isProcessingLocation}
-              >
-                {isProcessingLocation ? "Processing..." : "Use this Address"}
-              </button>
+              <div style={{ marginTop: "1rem", textAlign: "center" }}>
+                <button
+                  onClick={handleAddressSubmit}
+                  style={{
+                    marginTop: "0.75rem",
+                    padding: "0.65rem 1rem",
+                    background: "#241A90",
+                    color: "#fff",
+                    fontSize: "1rem",
+                    fontWeight: "bold",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    transition: "background 0.2s ease",
+                  }}
+                  onMouseOver={(e) => (e.currentTarget.style.background = "#3b2dbb")}
+                  onMouseOut={(e) => (e.currentTarget.style.background = "#241A90")}
+                  disabled={isProcessingLocation}
+                >
+                  Use This Address
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
