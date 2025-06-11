@@ -59,6 +59,7 @@ const Results = () => {
     address: "Unknown Location",
   };
   const [searchLocation, setSearchLocation] = useState(initialSearchLocation);
+  const [selectedInsurance, setSelectedInsurance] = useState(location.state?.insurance || ""); // Initialize with insurance from Questionnaire
   const mapCenter = {
     lat: searchLocation.lat,
     lng: searchLocation.lng,
@@ -73,6 +74,19 @@ const Results = () => {
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
   const debounceTimerRef = useRef(null);
   const [showLoading, setShowLoading] = useState(true);
+
+  // List of popular U.S. health insurance companies
+  const insuranceCompanies = [
+    "Select Insurance",
+    "UnitedHealthcare",
+    "Blue Cross Blue Shield",
+    "Aetna",
+    "Cigna",
+    "Humana",
+    "Kaiser Permanente",
+    "Anthem",
+    "Molina Healthcare",
+  ];
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -275,7 +289,7 @@ const Results = () => {
                 />
               </div>
             </div>
-            <div className="btn-group">
+            <div className="btn-group me-2">
               <button
                 type="button"
                 className="btn text-white px-3 py-1"
@@ -295,9 +309,51 @@ const Results = () => {
                   e.target.style.backgroundColor = "#343A40";
                   e.target.style.borderColor = "#343A40";
                 }}
+                disabled={isProcessingLocation}
               >
                 {searchLocation.address !== "Unknown Location" ? `Location: ${searchLocation.address}` : "Set Location"}
               </button>
+            </div>
+            <div className="btn-group">
+              <select
+                value={selectedInsurance}
+                onChange={(e) => setSelectedInsurance(e.target.value)}
+                style={{
+                  backgroundColor: isProcessingLocation ? "#6c757d" : "#343A40",
+                  border: "1px solid",
+                  borderColor: isProcessingLocation ? "#6c757d" : "#343A40",
+                  borderRadius: "20px",
+                  color: "#fff",
+                  padding: "0.25rem 2rem 0.25rem 0.75rem",
+                  fontSize: "0.9rem",
+                  transition: "background-color 0.3s ease, border-color 0.3s ease",
+                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 0.75rem center",
+                  backgroundSize: "12px",
+                }}
+                onMouseOver={(e) => {
+                  if (!isProcessingLocation) {
+                    e.target.style.backgroundColor = "#495057";
+                    e.target.style.borderColor = "#495057";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isProcessingLocation) {
+                    e.target.style.backgroundColor = "#343A40";
+                    e.target.style.borderColor = "#343A40";
+                  }
+                }}
+                disabled={isProcessingLocation}
+              >
+                {insuranceCompanies.map((company, idx) => (
+                  <option key={idx} value={company} disabled={company === "Select Insurance"}>
+                    {company}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="card shadow-lg" style={{ borderRadius: "20px", maxHeight: "550px", overflowY: "auto", width: "100%", textAlign: "left" }}>
@@ -359,7 +415,7 @@ const Results = () => {
                 Filter By
               </button>
               <div className="dropdown-menu p-2" style={{ minWidth: "300px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
-                <p className="text-muted mb-0">Filter options coming soon...</p>
+                <p className="text-muted mb-0">Filter options coming soon...{selectedInsurance ? ` (Selected Insurance: ${selectedInsurance})` : ""}</p>
               </div>
             </div>
           </div>
