@@ -27,12 +27,26 @@ const Questionnaire = () => {
   const [coords, setCoords] = useState({ lat: null, lng: null });
   const [geoError, setGeoError] = useState(null);
   const [showGeoErrorBanner, setShowGeoErrorBanner] = useState(false);
+  const [selectedInsurance, setSelectedInsurance] = useState(""); // New state for insurance
   const geoErrorTimeoutRef = useRef(null);
   const [isProcessingLocation, setIsProcessingLocation] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceTimerRef = useRef(null);
   const chatRef = useRef(null);
+
+  // List of popular U.S. health insurance companies
+  const insuranceCompanies = [
+    "Select Insurance",
+    "UnitedHealthcare",
+    "Blue Cross Blue Shield",
+    "Aetna",
+    "Cigna",
+    "Humana",
+    "Kaiser Permanente",
+    "Anthem",
+    "Molina Healthcare",
+  ];
 
   useEffect(() => {
     if (chatRef.current) {
@@ -148,7 +162,13 @@ const Questionnaire = () => {
         await new Promise((resolve) => setTimeout(resolve, remainingTime));
       }
 
-      navigate("/results", { state: { results: hospitals, searchLocation: { lat: searchLat, lng: searchLng, address: searchAddressString } } });
+      navigate("/results", {
+        state: {
+          results: hospitals,
+          searchLocation: { lat: searchLat, lng: searchLng, address: searchAddressString },
+          insurance: selectedInsurance, // Pass selected insurance to results
+        },
+      });
     } catch (e) {
       console.error("Failed to fetch hospital data:", e);
       alert("Failed to fetch hospital data. Please try again later.");
@@ -393,12 +413,12 @@ const Questionnaire = () => {
                   <FaMapMarkerAlt
                     size={18}
                     style={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "0.85rem",
-                      transform: "translateY(-50%)",
-                      color: "#6c757d",
-                      pointerEvents: "none",
+                        position: "absolute",
+                        top: "50%",
+                        left: "0.85rem",
+                        transform: "translateY(-50%)",
+                        color: "#6c757d",
+                        pointerEvents: "none",
                     }}
                   />
                   <input
@@ -509,7 +529,7 @@ const Questionnaire = () => {
             paddingRight: "1rem",
             display: "flex",
             flexDirection: "column",
-            gap: "1rem",
+            gap: "0.75rem", // Reduced gap to maintain tight spacing
             zIndex: 100,
             boxSizing: "border-box",
             backgroundColor: "white",
@@ -595,6 +615,49 @@ const Questionnaire = () => {
           >
             {getLocationButtonText()}
           </button>
+
+          <select
+            value={selectedInsurance}
+            onChange={(e) => setSelectedInsurance(e.target.value)}
+            style={{
+              width: "100%",
+              background: isProcessingLocation ? "#e9ecef" : "#6c757d",
+              color: isProcessingLocation ? "#6c757d" : "#fff",
+              padding: "0.75rem",
+              borderRadius: 12,
+              border: "2px solid",
+              borderColor: isProcessingLocation ? "#e9ecef" : "#6c757d",
+              cursor: isProcessingLocation ? "not-allowed" : "pointer",
+              transition: "background-color 0.2s ease, border-color 0.2s ease",
+              fontSize: "1rem",
+              fontWeight: "bold",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              appearance: "none", // Remove default browser styling
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E")`, // Custom arrow
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 1rem center",
+              backgroundSize: "12px",
+            }}
+            onMouseOver={(e) => {
+              if (!isProcessingLocation) {
+                e.currentTarget.style.background = "#5a6268";
+                e.currentTarget.style.borderColor = "#545b62";
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!isProcessingLocation) {
+                e.currentTarget.style.background = "#6c757d";
+                e.currentTarget.style.borderColor = "#6c757d";
+              }
+            }}
+            disabled={isProcessingLocation}
+          >
+            {insuranceCompanies.map((company, idx) => (
+              <option key={idx} value={company} disabled={company === "Select Insurance"}>
+                {company}
+              </option>
+            ))}
+          </select>
 
           <button
             className="btn"
