@@ -59,7 +59,7 @@ const Results = () => {
     address: "Unknown Location",
   };
   const [searchLocation, setSearchLocation] = useState(initialSearchLocation);
-  const [selectedInsurance, setSelectedInsurance] = useState(location.state?.insurance || ""); // Initialize with insurance from Questionnaire
+  const [selectedInsurance, setSelectedInsurance] = useState(location.state?.insurance || "");
   const mapCenter = {
     lat: searchLocation.lat,
     lng: searchLocation.lng,
@@ -75,7 +75,6 @@ const Results = () => {
   const debounceTimerRef = useRef(null);
   const [showLoading, setShowLoading] = useState(true);
 
-  // List of popular U.S. health insurance companies
   const insuranceCompanies = [
     "Select Insurance",
     "UnitedHealthcare",
@@ -248,72 +247,7 @@ const Results = () => {
 
       <div className="row w-100 d-flex justify-content-center align-items-start flex-grow-1 mt-2">
         <div className="col-md-6">
-          <div className="d-flex justify-content-start mb-3">
-            <div className="btn-group me-2">
-              <button
-                type="button"
-                className="btn dropdown-toggle text-white px-3 py-1"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                style={{
-                  backgroundColor: "#343A40",
-                  border: "1px solid #343A40",
-                  borderRadius: "20px",
-                  transition: "background-color 0.3s ease, border-color 0.3s ease",
-                  fontSize: "0.9rem",
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = "#495057";
-                  e.target.style.borderColor = "#495057";
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = "#343A40";
-                  e.target.style.borderColor = "#343A40";
-                }}
-              >
-                Adjust Radius: {radius} mi
-              </button>
-              <div className="dropdown-menu p-2" style={{ minWidth: "300px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
-                <div className="text-center mb-2">
-                  <strong>{radius} mile{radius > 1 ? "s" : ""}</strong>
-                </div>
-                <input
-                  type="range"
-                  id="dropdownRadiusRange"
-                  min="1"
-                  max="50"
-                  step="1"
-                  value={radius}
-                  onChange={(e) => setRadius(Number(e.target.value))}
-                  style={{ width: "100%" }}
-                />
-              </div>
-            </div>
-            <div className="btn-group me-2">
-              <button
-                type="button"
-                className="btn text-white px-3 py-1"
-                onClick={() => setShowAddressPopup(true)}
-                style={{
-                  backgroundColor: "#343A40",
-                  border: "1px solid #343A40",
-                  borderRadius: "20px",
-                  transition: "background-color 0.3s ease, border-color 0.3s ease",
-                  fontSize: "0.9rem",
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = "#495057";
-                  e.target.style.borderColor = "#495057";
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = "#343A40";
-                  e.target.style.borderColor = "#343A40";
-                }}
-                disabled={isProcessingLocation}
-              >
-                {searchLocation.address !== "Unknown Location" ? `Location: ${searchLocation.address}` : "Set Location"}
-              </button>
-            </div>
+          <div className="d-flex justify-content-between mb-3">
             <div className="btn-group">
               <select
                 value={selectedInsurance}
@@ -355,12 +289,39 @@ const Results = () => {
                 ))}
               </select>
             </div>
+            <div className="btn-group">
+              <button
+                type="button"
+                className="btn dropdown-toggle text-white px-3 py-1"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                style={{
+                  backgroundColor: "#343A40",
+                  border: "1px solid #343A40",
+                  borderRadius: "20px",
+                  transition: "background-color 0.3s ease, border-color 0.3s ease",
+                  fontSize: "0.9rem",
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = "#495057";
+                  e.target.style.borderColor = "#495057";
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = "#343A40";
+                  e.target.style.borderColor = "#343A40";
+                }}
+              >
+                Filter By
+              </button>
+              <div className="dropdown-menu p-2" style={{ minWidth: "300px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
+                <p className="text-muted mb-0">Filter options coming soon...{selectedInsurance ? ` (Selected Insurance: ${selectedInsurance})` : ""}</p>
+              </div>
+            </div>
           </div>
           <div className="card shadow-lg" style={{ borderRadius: "20px", maxHeight: "550px", overflowY: "auto", width: "100%", textAlign: "left" }}>
             <div className="card-body p-4">
               <h3 className="fw-bold mb-2">Top Matches</h3>
               <hr className="my-3" style={{ borderTop: "2px solid #ddd" }} />
-
               {filteredResults.length === 0 ? (
                 <p className="text-muted">No results found within the selected radius.</p>
               ) : (
@@ -389,7 +350,32 @@ const Results = () => {
         </div>
 
         <div className="col-md-6 mb-4">
-          <div className="d-flex justify-content-start mb-3">
+          <div className="d-flex justify-content-between mb-3">
+            <div className="btn-group">
+              <button
+                type="button"
+                className="btn text-white px-3 py-1"
+                onClick={() => setShowAddressPopup(true)}
+                style={{
+                  backgroundColor: "#343A40",
+                  border: "1px solid #343A40",
+                  borderRadius: "20px",
+                  transition: "background-color 0.3s ease, border-color 0.3s ease",
+                  fontSize: "0.9rem",
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = "#495057";
+                  e.target.style.borderColor = "#495057";
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = "#343A40";
+                  e.target.style.borderColor = "#343A40";
+                }}
+                disabled={isProcessingLocation}
+              >
+                {searchLocation.address !== "Unknown Location" ? `Location: ${searchLocation.address}` : "Set Location"}
+              </button>
+            </div>
             <div className="btn-group">
               <button
                 type="button"
@@ -412,10 +398,22 @@ const Results = () => {
                   e.target.style.borderColor = "#343A40";
                 }}
               >
-                Filter By
+                Adjust Radius: {radius} mi
               </button>
               <div className="dropdown-menu p-2" style={{ minWidth: "300px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
-                <p className="text-muted mb-0">Filter options coming soon...{selectedInsurance ? ` (Selected Insurance: ${selectedInsurance})` : ""}</p>
+                <div className="text-center mb-2">
+                  <strong>{radius} mile{radius > 1 ? "s" : ""}</strong>
+                </div>
+                <input
+                  type="range"
+                  id="dropdownRadiusRange"
+                  min="1"
+                  max="50"
+                  step="1"
+                  value={radius}
+                  onChange={(e) => setRadius(Number(e.target.value))}
+                  style={{ width: "100%" }}
+                />
               </div>
             </div>
           </div>
