@@ -272,7 +272,7 @@ const Questionnaire = () => {
             height: `calc(100vh - ${TOP_PADDING}rem - 13rem)`,
             overflowY: "auto",
             padding: "1rem",
-            paddingBottom: "10rem",
+            paddingBottom: "13rem",
             scrollbarGutter: "stable",
           }}
           className="d-flex flex-column align-items-center"
