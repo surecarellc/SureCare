@@ -1,34 +1,48 @@
 import React from "react";
 import { motion } from "framer-motion";
-import {useNavigation} from "./utils/goToFunctions.js";
+import { useNavigation } from "./utils/goToFunctions.js";
 import googleImage from "./components/google.png";
+import fullLogo from "./components/full_logo1.png"; // Import your logo image
 
 const SignIn = () => {
-  const { goToLaunchPage, goToSignUpPage} = useNavigation();
+  const { goToLaunchPage, goToSignUpPage } = useNavigation();
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -100 }}
       transition={{ duration: 0.5 }}
       className="d-flex justify-content-center align-items-center vh-100 bg-light"
-      style={{ flexDirection: 'column' }} // Ensure vertical stacking
+      style={{ flexDirection: "column" }}
     >
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
-        className="card p-4 shadow-lg" 
+        className="card p-4 shadow-lg"
         style={{ width: "500px" }}
       >
-        <div className="text-center mb-3">
-        <button 
+        <div className="text-center mb-4">
+          <button
             onClick={goToLaunchPage}
-            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+            }}
+            aria-label="Go to Launch Page"
           >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
+            <img
+              src={fullLogo}
+              alt="SureCare Logo"
+              style={{
+                height: "60px",
+                width: "auto",
+                objectFit: "contain",
+              }}
+            />
           </button>
         </div>
         <button className="btn btn-outline-primary w-100 mb-2 d-flex align-items-center justify-content-center">
@@ -44,44 +58,57 @@ const SignIn = () => {
         <form>
           <div className="mb-3">
             <label className="form-label">Email</label>
-            <input type="email" className="form-control" placeholder="Enter your email" />
+            <input
+              type="email"
+              className="form-control"
+              placeholder="Enter your email"
+            />
           </div>
           <div className="mb-3">
             <label className="form-label">Password</label>
-            <input type="password" className="form-control" placeholder="Enter your password" />
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Enter your password"
+            />
           </div>
-          <button type="submit" className="btn btn-success w-100">Sign In</button>
+          <button type="submit" className="btn btn-success w-100">
+            Sign In
+          </button>
         </form>
         <div className="text-center mt-2">
-          <a href="/" className="text-decoration-none">Forgot password?</a>
+          <a href="/" className="text-decoration-none">
+            Forgot password?
+          </a>
         </div>
         <div className="text-center mt-3">
-          <button onClick={goToSignUpPage} className="btn btn-outline-dark">Sign Up</button>
+          <button onClick={goToSignUpPage} className="btn btn-outline-dark">
+            Sign Up
+          </button>
         </div>
         <footer className="text-center mt-4 text-muted">
           © 2025 SureCare. All rights reserved.
         </footer>
       </motion.div>
-      {/* Back Button Outside the Card */}
-      <div 
-        style={{ 
-          width: "500px", // Match the card width
-          marginTop: "1rem", // Space between card and button
-          textAlign: "left" // Align button to the left
+      <div
+        style={{
+          width: "500px",
+          marginTop: "1rem",
+          textAlign: "left",
         }}
       >
-        <button 
-          onClick={goToLaunchPage} 
+        <button
+          onClick={goToLaunchPage}
           className="btn"
           style={{
             backgroundColor: "#3AADA4",
             color: "white",
             border: "3AADA4",
             padding: "0.25rem 1rem",
-            fontSize: "1.6rem"
+            fontSize: "1.6rem",
           }}
         >
-          &#8678; {/* Unicode for a left arrow */}
+          &#8678;
         </button>
       </div>
     </motion.div>

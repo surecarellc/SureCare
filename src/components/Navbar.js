@@ -1,12 +1,12 @@
 import React from "react";
 import { useNavigation } from "../utils/goToFunctions.js";
 import { useLocation } from "react-router-dom";
+import fullLogo from "../components/full_logo1.png"; // Adjust path if needed
 
 const Navbar = () => {
   const { goToLaunchPage, goToAboutPage, goToHelpPage, goToSignInPage } = useNavigation();
   const location = useLocation();
 
-  // Handle navigation with scroll to top if on same page
   const handleNavigation = (path, navigateFunction) => {
     if (location.pathname === path) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -24,16 +24,27 @@ const Navbar = () => {
         <button
           onClick={goToLaunchPage}
           style={{
-            fontSize: "clamp(1.5rem, 4vw, 2rem)",
-            fontWeight: "700",
             cursor: "pointer",
             background: "none",
             border: "none",
+            padding: 0,
           }}
           aria-label="Go to Home Page"
         >
-          <span style={{ color: "#241A90" }}>Sure</span>
-          <span style={{ color: "#3AADA4" }}>Care</span>
+          <img
+            src={fullLogo}
+            alt="SureCare Logo"
+            style={{
+              maxHeight: "40px",      // Keeps navbar height controlled
+              height: "100%",
+              width: "auto",          // Maintain aspect ratio
+              objectFit: "contain",
+              transform: "scale(1.2)", // Visually enlarges the image
+              transformOrigin: "left center" // Keeps scaling from pushing it downward
+            }}
+          />
+
+
         </button>
         <div className="d-flex">
           <button
@@ -63,4 +74,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

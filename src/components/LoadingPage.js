@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import fullLogo from '../components/full_logo1.png'; // adjust path if needed
 
 const LoadingPage = ({ loading }) => {
   const [minTimePassed, setMinTimePassed] = useState(false);
   const [shouldShow, setShouldShow] = useState(true);
 
-  // 1. Start a 2.5s timer on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setMinTimePassed(true);
@@ -14,7 +13,6 @@ const LoadingPage = ({ loading }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // 2. Hide only after both conditions are true
   useEffect(() => {
     if (!loading && minTimePassed) {
       setShouldShow(false);
@@ -23,25 +21,9 @@ const LoadingPage = ({ loading }) => {
 
   if (!shouldShow) return null;
 
-  const letters = "SureCare".split("");
-
-  const letterVariants = {
-    initial: { y: 0 },
-    animate: (i) => ({
-      y: [0, -20, 0],
-      transition: {
-        duration: 0.5,
-        repeat: Infinity, // Keep animating indefinitely
-        repeatDelay: 1.5,
-        delay: i * 0.1,
-        ease: "easeInOut",
-      },
-    }),
-  };
-
   return (
     <div
-      className="d-flex justify-content-center align-items-center min-vh-100"
+      className="d-flex justify-content-center align-items-center min-vh-100 flex-column"
       style={{
         backgroundColor: "#ffffff",
         position: "fixed",
@@ -52,33 +34,29 @@ const LoadingPage = ({ loading }) => {
         zIndex: 9999,
       }}
     >
-      <div className="text-center">
-        <div
-          style={{
-            fontSize: "5rem",
-            fontWeight: "700",
-            fontStyle: "italic",
-            textShadow: "2px 2px 4px rgba(0,0,0,0.2)",
-          }}
-        >
-          {letters.map((letter, i) => (
-            <motion.span
-              key={i}
-              custom={i}
-              initial="initial"
-              animate="animate"
-              variants={letterVariants}
-              style={{
-                display: "inline-block",
-                color: i < 4 ? "#241A90" : "#3AADA4",
-                margin: "0 1px",
-              }}
-            >
-              {letter}
-            </motion.span>
-          ))}
-        </div>
-      </div>
+      <img
+        src={fullLogo}
+        alt="SureCare Logo"
+        style={{ height: "100px", width: "auto", marginBottom: "30px" }}
+      />
+      <div
+        style={{
+          width: "40px",
+          height: "40px",
+          border: "4px solid #ddd",
+          borderTop: "4px solid #241A90", // Sure color
+          borderRadius: "50%",
+          animation: "spin 1s linear infinite",
+        }}
+      />
+      {/* Keyframes definition via inline <style> tag */}
+      <style>
+        {`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </div>
   );
 };

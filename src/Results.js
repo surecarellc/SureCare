@@ -6,6 +6,8 @@ import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { useNavigation } from "./utils/goToFunctions.js";
 import { geocodeAddress } from "./services/userService";
 import LoadingPage from "./components/LoadingPage";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 const mapContainerStyle = {
   width: "100%",
@@ -33,10 +35,6 @@ function getDistanceMiles(lat1, lng1, lat2, lng2) {
 const Results = () => {
   const {
     goToQuestionnairePage,
-    goToLaunchPage,
-    goToAboutPage,
-    goToHelpPage,
-    goToSignInPage,
   } = useNavigation();
 
   const location = useLocation();
@@ -213,38 +211,7 @@ const Results = () => {
       className="container d-flex flex-column min-vh-100 justify-content-center align-items-center text-center"
       style={{ paddingTop: "150px", paddingBottom: "80px", maxWidth: "1550px" }}
     >
-      <nav
-        className="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom border-dark px-0"
-        style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 1000 }}
-      >
-        <div className="container-fluid d-flex justify-content-between">
-          <button
-            onClick={goToLaunchPage}
-            style={{
-              fontSize: "2rem",
-              fontWeight: "700",
-              cursor: "pointer",
-              background: "none",
-              border: "none",
-            }}
-          >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
-          </button>
-          <div className="d-flex">
-            <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToAboutPage}>
-              About
-            </button>
-            <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToHelpPage}>
-              Help
-            </button>
-            <button className="nav-link text-dark mx-3 bg-transparent border-0" onClick={goToSignInPage}>
-              Sign In
-            </button>
-          </div>
-        </div>
-      </nav>
-
+      <Navbar />
       <div className="row w-100 d-flex justify-content-center align-items-start flex-grow-1 mt-2">
         <div className="col-md-6">
           <div className="d-flex justify-content-between mb-3">
@@ -632,12 +599,9 @@ const Results = () => {
         )}
       </AnimatePresence>
 
-      <footer
-        className="text-center p-4 text-muted bg-white shadow-sm border-dark"
-        style={{ position: "fixed", bottom: 0, left: "0", right: "0", width: "100%", borderTop: "1px solid white" }}
-      >
-        © 2025 SureCare. All Rights Reserved.
-      </footer>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1000 }}>
+        <Footer />
+      </div>
     </motion.div>
   );
 };
