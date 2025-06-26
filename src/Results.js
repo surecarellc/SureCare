@@ -1,6 +1,6 @@
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTimes, FaMapMarkerAlt } from "react-icons/fa";
+import { FaTimes, FaMapMarkerAlt, FaShieldAlt } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { useNavigation } from "./utils/goToFunctions.js";
@@ -33,10 +33,7 @@ function getDistanceMiles(lat1, lng1, lat2, lng2) {
 }
 
 const Results = () => {
-  const {
-    goToQuestionnairePage,
-  } = useNavigation();
-
+  const { goToQuestionnairePage } = useNavigation();
   const location = useLocation();
   const allResults = useMemo(() => {
     const rawState = location.state;
@@ -74,7 +71,7 @@ const Results = () => {
   const [showLoading, setShowLoading] = useState(true);
 
   const insuranceCompanies = [
-    "Select Insurance",
+    "No Insurance",
     "UnitedHealthcare",
     "Blue Cross Blue Shield",
     "Aetna",
@@ -209,31 +206,34 @@ const Results = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.2 }}
       className="container d-flex flex-column min-vh-100 justify-content-center align-items-center text-center"
-      style={{ paddingTop: "150px", paddingBottom: "80px", maxWidth: "1550px" }}
+      style={{ paddingTop: "120px", paddingBottom: "80px", maxWidth: "1550px", fontFamily: "'Inter', sans-serif" }}
     >
       <Navbar />
       <div className="row w-100 d-flex justify-content-center align-items-start flex-grow-1 mt-2">
         <div className="col-md-6">
           <div className="d-flex justify-content-between mb-3">
-            <div className="btn-group">
-              <select
-                value={selectedInsurance}
-                onChange={(e) => setSelectedInsurance(e.target.value)}
+            <div className="btn-group" style={{ position: "relative" }}>
+              <button
+                type="button"
+                className="btn text-white px-3 py-1"
+                onClick={() => {
+                  const select = document.getElementById("insurance");
+                  select.focus();
+                  select.click();
+                }}
                 style={{
                   backgroundColor: isProcessingLocation ? "#6c757d" : "#343A40",
                   border: "1px solid",
                   borderColor: isProcessingLocation ? "#6c757d" : "#343A40",
                   borderRadius: "20px",
-                  color: "#fff",
-                  padding: "0.25rem 2rem 0.25rem 0.75rem",
                   fontSize: "0.9rem",
                   transition: "background-color 0.3s ease, border-color 0.3s ease",
+                  display: "flex",
+                  alignItems: "center",
                   cursor: isProcessingLocation ? "not-allowed" : "pointer",
-                  appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 0.75rem center",
-                  backgroundSize: "12px",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
                 onMouseOver={(e) => {
                   if (!isProcessingLocation) {
@@ -248,9 +248,32 @@ const Results = () => {
                   }
                 }}
                 disabled={isProcessingLocation}
+                aria-label="Select insurance provider"
+                title={selectedInsurance || "Select Insurance"}
               >
+                <FaShieldAlt size={14} style={{ marginRight: "0.5rem" }} />
+                {selectedInsurance || "Select Insurance"}
+              </button>
+              <select
+                id="insurance"
+                value={selectedInsurance}
+                onChange={(e) => setSelectedInsurance(e.target.value)}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  opacity: 0,
+                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
+                }}
+                disabled={isProcessingLocation}
+              >
+                <option value="" disabled>
+                  Select Insurance
+                </option>
                 {insuranceCompanies.map((company, idx) => (
-                  <option key={idx} value={company} disabled={company === "Select Insurance"}>
+                  <option key={idx} value={company}>
                     {company}
                   </option>
                 ))}
@@ -268,6 +291,8 @@ const Results = () => {
                   borderRadius: "20px",
                   transition: "background-color 0.3s ease, border-color 0.3s ease",
                   fontSize: "0.9rem",
+                  display: "flex",
+                  alignItems: "center",
                 }}
                 onMouseOver={(e) => {
                   e.target.style.backgroundColor = "#495057";
@@ -285,7 +310,7 @@ const Results = () => {
               </div>
             </div>
           </div>
-          <div className="card shadow-lg" style={{ borderRadius: "20px", maxHeight: "550px", overflowY: "auto", width: "100%", textAlign: "left" }}>
+          <div className="card shadow-lg" style={{ borderRadius: "20px", maxHeight: "610px", overflowY: "auto", width: "100%", textAlign: "left" }} aria-live="polite">
             <div className="card-body p-4">
               <h3 className="fw-bold mb-2">Top Matches</h3>
               <hr className="my-3" style={{ borderTop: "2px solid #ddd" }} />
@@ -329,6 +354,11 @@ const Results = () => {
                   borderRadius: "20px",
                   transition: "background-color 0.3s ease, border-color 0.3s ease",
                   fontSize: "0.9rem",
+                  display: "flex",
+                  alignItems: "center",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
                 onMouseOver={(e) => {
                   e.target.style.backgroundColor = "#495057";
@@ -339,7 +369,10 @@ const Results = () => {
                   e.target.style.borderColor = "#343A40";
                 }}
                 disabled={isProcessingLocation}
+                aria-label={searchLocation.address !== "Unknown Location" ? `Edit location: ${searchLocation.address}` : "Set location"}
+                title={searchLocation.address !== "Unknown Location" ? searchLocation.address : "Set Location"}
               >
+                <FaMapMarkerAlt size={14} style={{ marginRight: "0.5rem" }} />
                 {searchLocation.address !== "Unknown Location" ? `Location: ${searchLocation.address}` : "Set Location"}
               </button>
             </div>
@@ -355,6 +388,8 @@ const Results = () => {
                   borderRadius: "20px",
                   transition: "background-color 0.3s ease, border-color 0.3s ease",
                   fontSize: "0.9rem",
+                  display: "flex",
+                  alignItems: "center",
                 }}
                 onMouseOver={(e) => {
                   e.target.style.backgroundColor = "#495057";
@@ -384,7 +419,7 @@ const Results = () => {
               </div>
             </div>
           </div>
-          <div className="card shadow-lg" style={{ borderRadius: "20px", height: "550px", backgroundColor: "#f8f9fa" }}>
+          <div className="card shadow-lg" style={{ borderRadius: "20px", height: "610px", backgroundColor: "#f8f9fa" }}>
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
               zoom={10}
@@ -409,7 +444,7 @@ const Results = () => {
         <button
           type="button"
           className="btn text-white px-3 py-1"
-          onClick={goToQuestionnairePage}
+          onClick={() => goToQuestionnairePage({ insurance: selectedInsurance, searchLocation })}
           style={{
             backgroundColor: "#343A40",
             border: "1px solid #343A40",

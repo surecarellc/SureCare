@@ -55,7 +55,7 @@ const LaunchPage = () => {
       <Navbar className="position-sticky top-0 z-3" />
       <motion.section
         className="d-flex flex-column align-items-center text-center text-white position-relative"
-        style={{ height: "calc(80vh - 70px)", width: "100vw", marginTop: "70px" }}
+        style={{ height: "calc(80vh - 70px)", width: "100vw", marginTop: "55px" }}
       >
         {/* Background Image without Zoom */}
         <div
