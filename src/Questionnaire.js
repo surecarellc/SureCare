@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaArrowRight, FaTimes, FaMapMarkerAlt } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FaArrowRight, FaTimes, FaMapMarkerAlt, FaShieldAlt } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,7 @@ const TOP_PADDING = 2;
 
 const Questionnaire = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [messages, setMessages] = useState(() => {
     try {
       const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -21,13 +22,19 @@ const Questionnaire = () => {
     }
   });
   const [inputValue, setInputValue] = useState("");
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState(location.state?.searchLocation?.address || "");
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
-  const [showAddressPopup, setShowAddressPopup] = useState(true);
-  const [coords, setCoords] = useState({ lat: null, lng: null });
+  const [coords, setCoords] = useState({
+    lat: location.state?.searchLocation?.lat || null,
+    lng: location.state?.searchLocation?.lng || null,
+  });
   const [geoError, setGeoError] = useState(null);
   const [showGeoErrorBanner, setShowGeoErrorBanner] = useState(false);
-  const [selectedInsurance, setSelectedInsurance] = useState(""); // New state for insurance
+  const [selectedInsurance, setSelectedInsurance] = useState(location.state?.insurance || "");
+  // Initialize showAddressPopup without isDeviceGeoAvailable
+  const [showAddressPopup, setShowAddressPopup] = useState(
+    !location.state?.searchLocation && !(coords.lat !== null && !geoError)
+  );
   const geoErrorTimeoutRef = useRef(null);
   const [isProcessingLocation, setIsProcessingLocation] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
@@ -35,9 +42,8 @@ const Questionnaire = () => {
   const debounceTimerRef = useRef(null);
   const chatRef = useRef(null);
 
-  // List of popular U.S. health insurance companies
   const insuranceCompanies = [
-    "Select Insurance",
+    "No Insurance",
     "UnitedHealthcare",
     "Blue Cross Blue Shield",
     "Aetna",
@@ -47,6 +53,22 @@ const Questionnaire = () => {
     "Anthem",
     "Molina Healthcare",
   ];
+
+  // Update selectedInsurance and location when location.state changes
+  useEffect(() => {
+    console.log("Questionnaire.js location.state:", location.state);
+    if (location.state?.insurance) {
+      setSelectedInsurance(location.state.insurance);
+    }
+    if (location.state?.searchLocation) {
+      setAddress(location.state.searchLocation.address || "");
+      setCoords({
+        lat: location.state.searchLocation.lat || null,
+        lng: location.state.searchLocation.lng || null,
+      });
+      setShowAddressPopup(false); // Avoid showing popup if searchLocation exists
+    }
+  }, [location.state]);
 
   useEffect(() => {
     if (chatRef.current) {
@@ -166,7 +188,7 @@ const Questionnaire = () => {
         state: {
           results: hospitals,
           searchLocation: { lat: searchLat, lng: searchLng, address: searchAddressString },
-          insurance: selectedInsurance, // Pass selected insurance to results
+          insurance: selectedInsurance,
         },
       });
     } catch (e) {
@@ -242,11 +264,11 @@ const Questionnaire = () => {
 
   const getLocationButtonText = () => {
     if (isAddressEntered) {
-      return `Edit Address: ${address}`;
+      return address;
     } else if (isDeviceGeoAvailable) {
-      return "Using This Device's Location (Click to Enter Different Address)";
+      return "Current Location";
     } else {
-      return "Enter Address Manually";
+      return "Enter Address";
     }
   };
 
@@ -261,7 +283,7 @@ const Questionnaire = () => {
       exit={{ opacity: 0, y: -50 }}
       transition={{ duration: 0.7 }}
       className="d-flex flex-column"
-      style={{ minHeight: "100vh", position: "relative" }}
+      style={{ minHeight: "100vh", position: "relative", fontFamily: "'Inter', sans-serif" }}
     >
       <Navbar />
       <div className="flex-grow-1 d-flex flex-column" style={{ marginTop: "3.5rem" }}>
@@ -272,37 +294,46 @@ const Questionnaire = () => {
             height: `calc(100vh - ${TOP_PADDING}rem - 13rem)`,
             overflowY: "auto",
             padding: "1rem",
-            paddingBottom: "13rem",
+            paddingBottom: "9rem",
             scrollbarGutter: "stable",
           }}
           className="d-flex flex-column align-items-center"
         >
           {messages.map((m, i) => (
-            <div
+            <motion.div
               key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
               className={`d-flex mb-2 ${m.sender === "user" ? "justify-content-end" : "justify-content-start"}`}
               style={{ maxWidth: "calc(600px + 1rem)", width: "100%" }}
             >
               <div
                 style={{
-                  background: m.sender === "user" ? "#3AADA4" : "#e9ecef",
-                  color: m.sender === "user" ? "#fff" : "#000",
-                  borderRadius: 12,
-                  padding: "0.5rem 1rem",
+                  background: m.sender === "user" ? "#3AADA4" : "#ffffff",
+                  color: m.sender === "user" ? "#fff" : "#212529",
+                  borderRadius: "16px",
+                  padding: "0.75rem 1.25rem",
                   maxWidth: "80%",
+                  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+                  fontSize: "0.95rem",
                 }}
               >
                 {m.text}
               </div>
-            </div>
+            </motion.div>
           ))}
           {showGeoErrorBanner && geoError && (
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
               style={{
-                color: "red",
-                background: "rgba(255, 224, 224, 0.9)",
-                border: "1px solid rgba(255, 100, 100, 0.5)",
-                padding: "0.75rem 1rem",
+                color: "#721c24",
+                background: "#f8d7da",
+                border: "1px solid #f5c6cb",
+                padding: "0.75rem 1.25rem",
                 borderRadius: "8px",
                 marginTop: "1rem",
                 textAlign: "center",
@@ -311,23 +342,30 @@ const Questionnaire = () => {
                 boxSizing: "border-box",
                 fontSize: "0.9rem",
                 zIndex: 50,
+                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
               }}
             >
               Location Error: {geoError}. Please enable location services or enter an address manually.
-            </div>
+            </motion.div>
           )}
           {isProcessingLocation && (
-            <div className="d-flex justify-content-start mb-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="d-flex justify-content-start mb-2"
+            >
               <div
                 style={{
                   background: "#e9ecef",
-                  borderRadius: 12,
-                  padding: "0.5rem 1rem",
+                  borderRadius: "16px",
+                  padding: "0.75rem 1.25rem",
+                  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
                 }}
               >
                 <LoadingPage />
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
 
@@ -413,12 +451,12 @@ const Questionnaire = () => {
                   <FaMapMarkerAlt
                     size={18}
                     style={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "0.85rem",
-                        transform: "translateY(-50%)",
-                        color: "#6c757d",
-                        pointerEvents: "none",
+                      position: "absolute",
+                      top: "50%",
+                      left: "0.85rem",
+                      transform: "translateY(-50%)",
+                      color: "#6c757d",
+                      pointerEvents: "none",
                     }}
                   />
                   <input
@@ -529,7 +567,7 @@ const Questionnaire = () => {
             paddingRight: "1rem",
             display: "flex",
             flexDirection: "column",
-            gap: "0.75rem", // Reduced gap to maintain tight spacing
+            gap: "0.75rem",
             zIndex: 100,
             boxSizing: "border-box",
             backgroundColor: "white",
@@ -580,84 +618,157 @@ const Questionnaire = () => {
             </button>
           </div>
 
-          <button
-            className="btn"
-            style={{
-              width: "100%",
-              background: isProcessingLocation ? "#e9ecef" : "#6c757d",
-              color: isProcessingLocation ? "#6c757d" : "#fff",
-              padding: "0.75rem",
-              borderRadius: 12,
-              border: "2px solid",
-              borderColor: isProcessingLocation ? "#e9ecef" : "#6c757d",
-              cursor: isProcessingLocation ? "not-allowed" : "pointer",
-              transition: "background-color 0.2s ease, border-color 0.2s ease",
-              textAlign: "left",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            }}
-            onMouseOver={(e) => {
-              if (!isProcessingLocation) {
-                e.currentTarget.style.background = "#5a6268";
-                e.currentTarget.style.borderColor = "#545b62";
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!isProcessingLocation) {
-                e.currentTarget.style.background = "#6c757d";
-                e.currentTarget.style.borderColor = "#6c757d";
-              }
-            }}
-            onClick={() => setShowAddressPopup(true)}
-            disabled={isProcessingLocation}
-          >
-            {getLocationButtonText()}
-          </button>
+          <div style={{ display: "flex", gap: "1rem" }}>
+            <div style={{ flex: 1, position: "relative", maxWidth: "calc(50% - 0.5rem)" }}>
+              <button
+                onClick={() => {
+                  const select = document.getElementById("insurance");
+                  select.focus();
+                  select.click();
+                }}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  background: isProcessingLocation ? "#e9ecef" : "#3AADA4",
+                  color: "#fff",
+                  padding: "0.75rem 0.5rem 0.75rem 2.5rem",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
+                  transition: "all 0.3s ease",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  boxShadow: isProcessingLocation ? "none" : "0 3px 6px rgba(58, 173, 164, 0.3)",
+                  width: "100%",
+                  height: "44px",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  if (!isProcessingLocation) {
+                    e.currentTarget.style.background = "#2e8b7f";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isProcessingLocation) {
+                    e.currentTarget.style.background = "#3AADA4";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }
+                }}
+                disabled={isProcessingLocation}
+                aria-label="Select insurance provider"
+                title={selectedInsurance || "Select Insurance"}
+              >
+                <FaShieldAlt
+                  size={16}
+                  style={{
+                    position: "absolute",
+                    left: "1rem",
+                    color: "#fff",
+                  }}
+                />
+                <span
+                  style={{
+                    display: "block",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    maxWidth: "calc(100% - 0.25rem)",
+                  }}
+                >
+                  {selectedInsurance || "Select Insurance"}
+                </span>
+              </button>
+              <select
+                id="insurance"
+                value={selectedInsurance}
+                onChange={(e) => setSelectedInsurance(e.target.value)}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  opacity: 0,
+                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
+                }}
+                disabled={isProcessingLocation}
+              >
+                <option value="" disabled>
+                  Select Insurance
+                </option>
+                {insuranceCompanies.map((company, idx) => (
+                  <option key={idx} value={company}>
+                    {company}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <select
-            value={selectedInsurance}
-            onChange={(e) => setSelectedInsurance(e.target.value)}
-            style={{
-              width: "100%",
-              background: isProcessingLocation ? "#e9ecef" : "#6c757d",
-              color: isProcessingLocation ? "#6c757d" : "#fff",
-              padding: "0.75rem",
-              borderRadius: 12,
-              border: "2px solid",
-              borderColor: isProcessingLocation ? "#e9ecef" : "#6c757d",
-              cursor: isProcessingLocation ? "not-allowed" : "pointer",
-              transition: "background-color 0.2s ease, border-color 0.2s ease",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-              appearance: "none", // Remove default browser styling
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E")`, // Custom arrow
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right 1rem center",
-              backgroundSize: "12px",
-            }}
-            onMouseOver={(e) => {
-              if (!isProcessingLocation) {
-                e.currentTarget.style.background = "#5a6268";
-                e.currentTarget.style.borderColor = "#545b62";
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!isProcessingLocation) {
-                e.currentTarget.style.background = "#6c757d";
-                e.currentTarget.style.borderColor = "#6c757d";
-              }
-            }}
-            disabled={isProcessingLocation}
-          >
-            {insuranceCompanies.map((company, idx) => (
-              <option key={idx} value={company} disabled={company === "Select Insurance"}>
-                {company}
-              </option>
-            ))}
-          </select>
+            <div style={{ flex: 1, position: "relative", maxWidth: "calc(50% - 0.5rem)" }}>
+              <button
+                id="address"
+                className="btn"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  background: isProcessingLocation ? "#e9ecef" : "#3AADA4",
+                  color: "#fff",
+                  padding: "0.75rem 0.5rem 0.75rem 2.5rem",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
+                  transition: "all 0.3s ease",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  boxShadow: isProcessingLocation ? "none" : "0 3px 6px rgba(58, 173, 164, 0.3)",
+                  width: "100%",
+                  height: "44px",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  if (!isProcessingLocation) {
+                    e.currentTarget.style.background = "#2e8b7f";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isProcessingLocation) {
+                    e.currentTarget.style.background = "#3AADA4";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }
+                }}
+                onClick={() => setShowAddressPopup(true)}
+                disabled={isProcessingLocation}
+                aria-label={isAddressEntered ? `Edit address: ${address}` : "Enter address manually"}
+                title={isAddressEntered ? address : "Enter address manually"}
+              >
+                <FaMapMarkerAlt
+                  size={16}
+                  style={{
+                    position: "absolute",
+                    left: "1rem",
+                    color: "#fff",
+                  }}
+                />
+                <span
+                  style={{
+                    display: "block",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    maxWidth: "calc(100% - 0.25rem)",
+                  }}
+                >
+                  {getLocationButtonText()}
+                </span>
+              </button>
+            </div>
+          </div>
 
           <button
             className="btn"
@@ -694,7 +805,7 @@ const Questionnaire = () => {
                 <LoadingPage />
               </div>
             ) : (
-              "Search For Hospitals Near Me"
+              "Find Hospitals Near Me"
             )}
           </button>
         </div>
