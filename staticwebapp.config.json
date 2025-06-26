@@ -1,1 +1,39 @@
-{"navigationFallback":{"rewrite":"/index.html"},"auth":{"rolesSource":"/api/NoOpRoles","identityProviders":{"google":{"registration":{"clientIdSettingName":"GOOGLE_CLIENT_ID","clientSecretSettingName":"GOOGLE_CLIENT_SECRET_APP_SETTING_NAME"}}}}}
+{
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  },
+  "auth": {
+    "identityProviders": {
+      "google": {
+        "registration": {
+          "clientIdSettingName": "GOOGLE_CLIENT_ID", 
+          "clientSecretSettingName": "GOOGLE_CLIENT_SECRET" 
+        },
+        "login": {
+          "scopes": [
+            "openid",
+            "profile",
+            "email"
+          ]
+        }
+      }
+    }
+    
+  },
+  "routes": [
+    {
+      "route": "/app/*", 
+      "allowedRoles": ["authenticated"] 
+    },
+    {
+      "route": "/*", 
+      "allowedRoles": ["anonymous", "authenticated"]
+    }
+  ],
+  "responseOverrides": {
+    "401": {
+      "statusCode": 302,
+      "redirect": "/.auth/login/google" 
+    }
+  }
+}
