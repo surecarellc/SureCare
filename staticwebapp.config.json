@@ -1,5 +1,1 @@
-{
-    "navigationFallback": {
-        "rewrite": "/index.html"
-    }
-}
+{"navigationFallback":{"rewrite":"/index.html"},"auth":{"rolesSource":"/api/NoOpRoles","identityProviders":{"google":{"registration":{"clientIdSettingName":"GOOGLE_CLIENT_ID","clientSecretSettingName":"GOOGLE_CLIENT_SECRET_APP_SETTING_NAME"}}}}}
