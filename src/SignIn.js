@@ -45,7 +45,10 @@ const SignIn = () => {
             />
           </button>
         </div>
-        <button className="btn btn-outline-primary w-100 mb-2 d-flex align-items-center justify-content-center">
+        <a
+          href="/.auth/login/google"
+          className="btn btn-outline-primary w-100 mb-2 d-flex align-items-center justify-content-center"
+        >
           <img
             src={googleImage}
             alt="Google Logo"
@@ -53,7 +56,7 @@ const SignIn = () => {
             className="me-2"
           />
           <span>Sign in with Google</span>
-        </button>
+        </a>
         <hr />
         <form>
           <div className="mb-3">
