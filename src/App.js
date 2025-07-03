@@ -6,7 +6,6 @@ import AboutPage from "./AboutPage";
 import HelpPage from "./HelpPage";
 import Questionnaire from "./Questionnaire";
 import SignIn from "./SignIn";
-import SignUp from "./SignUp";
 import Results from "./Results";
 
 function App() {
@@ -18,7 +17,6 @@ function App() {
         <Route path="/help" element={<HelpPage />} />
         <Route path="/questionnaire" element={<Questionnaire />} />
         <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
         <Route path="/results" element={<Results />} />
       </Routes>
     </Router>
