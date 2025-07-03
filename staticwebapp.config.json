@@ -1,1 +1,0 @@
-{"navigationFallback":{"rewrite":"/index.html"},"routes":[{"route":"/app/*","allowedRoles":["authenticated"]},{"route":"/*","allowedRoles":["anonymous","authenticated"]}],"responseOverrides":{"401":{"statusCode":302,"redirect":"/.auth/login/google"}}}
