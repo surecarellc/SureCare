@@ -1,9 +1,9 @@
 import React from "react";
 import { useNavigation } from "../utils/goToFunctions.js";
 import { useLocation } from "react-router-dom";
-import fullLogo from "../components/full_logo1.png"; // Adjust path if needed
+import fullLogo from "../components/full_logo1.png";
 
-const Navbar = () => {
+const Navbar = ({ user, onLogout }) => {
   const { goToLaunchPage, goToAboutPage, goToHelpPage, goToSignInPage } = useNavigation();
   const location = useLocation();
 
@@ -14,6 +14,10 @@ const Navbar = () => {
       navigateFunction();
     }
   };
+
+  // Safely get name and picture from user, accommodating your payload format
+  const userName = user?.name || (user?.profile && user.profile.name) || "User";
+  const userPicture = user?.picture || (user?.profile && user.profile.picture);
 
   return (
     <nav
@@ -35,18 +39,16 @@ const Navbar = () => {
             src={fullLogo}
             alt="SureCare Logo"
             style={{
-              maxHeight: "40px",      // Keeps navbar height controlled
+              maxHeight: "40px",
               height: "100%",
-              width: "auto",          // Maintain aspect ratio
+              width: "auto",
               objectFit: "contain",
-              transform: "scale(1.2)", // Visually enlarges the image
-              transformOrigin: "left center" // Keeps scaling from pushing it downward
+              transform: "scale(1.2)",
+              transformOrigin: "left center",
             }}
           />
-
-
         </button>
-        <div className="d-flex">
+        <div className="d-flex align-items-center">
           <button
             className="nav-link text-dark mx-3 bg-transparent border-0"
             onClick={() => handleNavigation("/about", goToAboutPage)}
@@ -61,13 +63,33 @@ const Navbar = () => {
           >
             Help
           </button>
-          <button
-            className="nav-link text-dark mx-3 bg-transparent border-0"
-            onClick={goToSignInPage}
-            aria-label="Go to Sign In Page"
-          >
-            Sign In
-          </button>
+          {user ? (
+            <div className="d-flex align-items-center">
+              {userPicture && (
+                <img
+                  src={userPicture}
+                  alt="Profile"
+                  style={{ width: 32, height: 32, borderRadius: "50%", marginRight: 8 }}
+                />
+              )}
+              <span className="nav-link text-dark mx-3">Welcome, {userName}</span>
+              <button
+                className="nav-link text-dark mx-3 bg-transparent border-0"
+                onClick={onLogout}
+                aria-label="Logout"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              className="nav-link text-dark mx-3 bg-transparent border-0"
+              onClick={goToSignInPage}
+              aria-label="Go to Sign In Page"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </div>
     </nav>
