@@ -1,89 +1,84 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
-import {useNavigation} from "./utils/goToFunctions.js";
-import googleImage from "./components/google.png";
+import { useNavigation } from "./utils/goToFunctions";
+import fullLogo from "./components/full_logo1.png";
 
 const SignIn = () => {
-  const { goToLaunchPage, goToSignUpPage} = useNavigation();
+  const { goToLaunchPage } = useNavigation();
+
+  useEffect(() => {
+    const handleCredentialResponse = (response) => {
+      try {
+        const token = response.credential;
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        localStorage.setItem("surecare_user", JSON.stringify(payload));
+        console.log("Google User:", payload);
+
+        goToLaunchPage();
+      } catch (error) {
+        console.error("Failed to parse Google token:", error);
+      }
+    };
+
+    if (window.google) {
+      window.google.accounts.id.initialize({
+        client_id:
+          "598536059411-3os2eiu1q13linv52nvpbsvtl2jgnka0.apps.googleusercontent.com",
+        callback: handleCredentialResponse,
+        auto_select: false,
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-signin-button"),
+        {
+          theme: "filled_blue",
+          size: "large",
+          width: "100%",
+          type: "standard",
+          text: "signin_with",
+          shape: "pill",
+          logo_alignment: "left",
+        }
+      );
+    }
+  }, [goToLaunchPage]);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -100 }}
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -40 }}
       transition={{ duration: 0.5 }}
       className="d-flex justify-content-center align-items-center vh-100 bg-light"
-      style={{ flexDirection: 'column' }} // Ensure vertical stacking
+      style={{ flexDirection: "column", padding: "1rem" }}
     >
-      <motion.div 
-        initial={{ opacity: 0, x: 100 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="card p-4 shadow-lg" 
-        style={{ width: "500px" }}
+      <motion.div
+        className="card shadow-lg p-5"
+        style={{ maxWidth: 420, width: "100%", borderRadius: "20px" }}
       >
-        <div className="text-center mb-3">
-        <button 
-            onClick={goToLaunchPage}
-            style={{ fontSize: "2rem", fontWeight: "700", cursor: "pointer", background: "none", border: "none" }}
-          >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
-          </button>
-        </div>
-        <button className="btn btn-outline-primary w-100 mb-2 d-flex align-items-center justify-content-center">
+        <div className="text-center mb-4">
           <img
-            src={googleImage}
-            alt="Google Logo"
-            width="20"
-            className="me-2"
+            src={fullLogo}
+            alt="SureCare Logo"
+            style={{ height: 70, objectFit: "contain" }}
           />
-          <span>Sign in with Google</span>
-        </button>
-        <hr />
-        <form>
-          <div className="mb-3">
-            <label className="form-label">Email</label>
-            <input type="email" className="form-control" placeholder="Enter your email" />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Password</label>
-            <input type="password" className="form-control" placeholder="Enter your password" />
-          </div>
-          <button type="submit" className="btn btn-success w-100">Sign In</button>
-        </form>
-        <div className="text-center mt-2">
-          <a href="/" className="text-decoration-none">Forgot password?</a>
         </div>
-        <div className="text-center mt-3">
-          <button onClick={goToSignUpPage} className="btn btn-outline-dark">Sign Up</button>
-        </div>
-        <footer className="text-center mt-4 text-muted">
-          © 2025 SureCare. All rights reserved.
-        </footer>
-      </motion.div>
-      {/* Back Button Outside the Card */}
-      <div 
-        style={{ 
-          width: "500px", // Match the card width
-          marginTop: "1rem", // Space between card and button
-          textAlign: "left" // Align button to the left
-        }}
-      >
-        <button 
-          onClick={goToLaunchPage} 
-          className="btn"
-          style={{
-            backgroundColor: "#3AADA4",
-            color: "white",
-            border: "3AADA4",
-            padding: "0.25rem 1rem",
-            fontSize: "1.6rem"
-          }}
+        <div id="google-signin-button" className="mb-3"></div>
+        <p
+          className="text-center mt-3"
+          style={{ color: "#555", fontSize: 14, userSelect: "none" }}
         >
-          &#8678; {/* Unicode for a left arrow */}
-        </button>
-      </div>
+          By signing in, you agree to our{" "}
+          <a href="/terms" target="_blank" rel="noopener noreferrer">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </a>
+          .
+        </p>
+      </motion.div>
     </motion.div>
   );
 };

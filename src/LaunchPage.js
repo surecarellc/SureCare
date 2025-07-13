@@ -1,31 +1,60 @@
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import { BiDollarCircle, BiHeart, BiCheckShield } from "react-icons/bi";
 import launchImage from "./components/launch_image.png";
-import { useNavigation } from "./utils/goToFunctions.js";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import { useNavigation } from "./utils/goToFunctions";
 
 const LaunchPage = () => {
-  const {
-    goToAboutPage,
-    goToQuestionnairePage,
-    goToSignInPage,
-    goToHelpPage,
-    goToLaunchPage,
-  } = useNavigation();
+  const { goToQuestionnairePage } = useNavigation();
+  const [user, setUser] = useState(null);
 
-  // Animation variants for hero section
-  const heroVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  useEffect(() => {
+    const savedUser = localStorage.getItem("surecare_user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleGetStarted = () => {
+    goToQuestionnairePage();
   };
 
-  // Animation variants for feature cards
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" } },
-    hover: { 
-      scale: 1.05, 
-      boxShadow: "0 4px 10px rgba(0,0,0,0.3)", 
-      transition: { duration: 0.3 } 
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("surecare_user");
+    window.google?.accounts.id.disableAutoSelect();
+  };
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2, ease: "easeOut" },
     },
+  };
+
+  const childVariants = {
+    hidden: { opacity: 0, y: 25 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  };
+
+  const Card = ({ children }) => {
+    const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
+    return (
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, y: 50 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.5 }}
+        className="col-lg-4 col-md-12 mb-4"
+      >
+        {children}
+      </motion.div>
+    );
   };
 
   return (
@@ -33,185 +62,172 @@ const LaunchPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="d-flex flex-column min-vh-100"
+      className="d-flex flex-column min-vh-100 align-items-center"
+      style={{
+        fontFamily: "'Inter', sans-serif",
+        backgroundColor: "#F5F7FA",
+      }}
     >
-      {/* Navbar */}
-      <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div className="container-fluid">
-          <button
-            onClick={goToLaunchPage}
-            style={{
-              fontSize: "2rem",
-              fontWeight: "700",
-              cursor: "pointer",
-              background: "none",
-              border: "none",
-            }}
-          >
-            <span style={{ color: "#241A90" }}>Sure</span>
-            <span style={{ color: "#3AADA4" }}>Care</span>
-          </button>
-          <div className="d-flex">
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToAboutPage}
-            >
-              About
-            </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToHelpPage}
-            >
-              Help
-            </button>
-            <button
-              className="nav-link text-dark mx-3 bg-transparent border-0"
-              onClick={goToSignInPage}
-            >
-              Sign In
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar className="position-sticky top-0 z-3" user={user} onLogout={handleLogout} />
 
-      {/* Hero Section */}
       <motion.section
-        variants={heroVariants}
-        initial="hidden"
-        animate="visible"
         className="d-flex flex-column align-items-center text-center text-white position-relative"
-        style={{
-          height: "80vh",
-          width: "100vw",
-          backgroundImage: `url(${launchImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
+        style={{ height: "calc(80vh - 70px)", width: "100vw", marginTop: "55px" }}
       >
         <div
           className="position-absolute top-0 start-0 w-100 h-100"
-          style={{ backgroundColor: "rgba(36, 26, 144, 0.5)", zIndex: 1 }}
+          style={{
+            backgroundImage: `url(${launchImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            zIndex: 0,
+          }}
         />
-        <div className="container position-relative" style={{ zIndex: 2, paddingTop: "26vh" }}>
-          <h1
-            className="display-3 fw-bold mb-3"
-            style={{ fontFamily: "Outfit, sans-serif", color: "#fff" }}
-          >
-            Find the Right Healthcare for You
-          </h1>
-          <p
-            className="lead mb-4"
-            style={{ fontFamily: "Outfit, sans-serif", fontWeight: "300", color: "#E0E0E0" }}
-          >
-            Discover transparent pricing, quality providers, and personalized care with SureCare.
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.1, backgroundColor: "#241A90" }}
-            whileTap={{ scale: 0.95 }}
-            className="btn mt-3 px-5 py-3 rounded-pill shadow"
+        <div
+          className="position-absolute top-0 start-0 w-100 h-100"
+          style={{
+            background: "linear-gradient(135deg, rgba(36, 26, 144, 0.7), rgba(58, 173, 164, 0.4))",
+            zIndex: 1,
+          }}
+        />
+
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="position-relative z-2 d-flex flex-column justify-content-center align-items-center h-100 px-4"
+        >
+          <motion.h1
+            variants={childVariants}
+            className="mb-4 fw-bold"
             style={{
-              backgroundColor: "#3AADA4",
-              color: "#fff",
-              fontFamily: "Outfit, sans-serif",
-              fontSize: "1.2rem",
-              border: "none",
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: "clamp(2.5rem, 7vw, 4.5rem)",
+              lineHeight: 1.2,
+              letterSpacing: "0.02em",
+              color: "#FFFFFF",
+              textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
             }}
-            onClick={goToQuestionnairePage}
+          >
+            Find the Best
+            <br />
+            Healthcare Options
+          </motion.h1>
+          <motion.p
+            variants={childVariants}
+            className="mb-5"
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 300,
+              fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
+              maxWidth: "700px",
+              lineHeight: 1.5,
+            }}
+          >
+            Compare prices, find top-rated providers, and get expert guidance for
+            your healthcare needs.
+          </motion.p>
+          <motion.button
+            variants={childVariants}
+            whileHover={{
+              scale: 1.05,
+              background: "linear-gradient(90deg, #241A90, #3AADA4)",
+            }}
+            whileTap={{ scale: 0.95 }}
+            className="btn px-5 py-3"
+            style={{
+              background: "linear-gradient(90deg, #3AADA4, #241A90)",
+              color: "white",
+              fontFamily: "'Outfit', sans-serif",
+              fontWeight: 600,
+              fontSize: "clamp(1rem, 2vw, 1.125rem)",
+              border: "none",
+              borderRadius: "12px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              minHeight: "48px",
+            }}
+            onClick={handleGetStarted}
+            aria-label="Get Started with Healthcare Options"
           >
             Get Started
           </motion.button>
-        </div>
+        </motion.div>
+
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+          className="position-absolute bottom-0 mb-3"
+          style={{ zIndex: 2 }}
+        >
+          <svg width="24" height="24" fill="white" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 16.5l-6-6h12l-6 6z" />
+          </svg>
+        </motion.div>
       </motion.section>
 
-      {/* Features Section */}
-      <section className="py-5 bg-light">
+      {/* Why Choose Section */}
+      <section className="py-5" style={{ backgroundColor: "#F5F7FA", width: "100vw" }}>
         <div className="container">
-          <h2
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             className="text-center mb-5"
-            style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700", color: "#241A90" }}
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontWeight: 700,
+              color: "#241A90",
+              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+            }}
           >
             Why Choose SureCare?
-          </h2>
-          <div className="row justify-content-between" style={{ gap: "0.75rem" }}>
-            <motion.div
-              className="col-12 col-md-4"
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              whileHover="hover"
-              style={{ overflow: "hidden", maxWidth: "28%" }}
-            >
-              <div className="card h-100 border-0 shadow-sm text-center">
-                <div className="card-body">
-                  <i className="fas fa-dollar-sign fa-3x mb-3" style={{ color: "#3AADA4" }}></i>
-                  <h5 className="card-title" style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700" }}>
-                    Transparent Pricing
-                  </h5>
-                  <p
-                    className="card-text"
-                    style={{ fontFamily: "Outfit, sans-serif", fontWeight: "300" }}
-                  >
-                    Know the real cost of healthcare before you choose, with clear and accurate pricing.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-            <motion.div
-              className="col-12 col-md-4"
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              whileHover="hover"
-              style={{ overflow: "hidden", maxWidth: "28%" }}
-            >
-              <div className="card h-100 border-0 shadow-sm text-center">
-                <div className="card-body">
-                  <i className="fas fa-stethoscope fa-3x mb-3" style={{ color: "#3AADA4" }}></i>
-                  <h5 className="card-title" style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700" }}>
-                    Quality Providers
-                  </h5>
-                  <p
-                    className="card-text"
-                    style={{ fontFamily: "Outfit, sans-serif", fontWeight: "300" }}
-                  >
-                    Access top-rated providers tailored to your needs.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-            <motion.div
-              className="col-12 col-md-4"
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              whileHover="hover"
-              style={{ overflow: "hidden", maxWidth: "28%" }}
-            >
-              <div className="card h-100 border-0 shadow-sm text-center">
-                <div className="card-body">
-                  <i className="fas fa-user-md fa-3x mb-3" style={{ color: "#3AADA4" }}></i>
-                  <h5 className="card-title" style={{ fontFamily: "Outfit, sans-serif", fontWeight: "700" }}>
-                    Personalized Care
-                  </h5>
-                  <p
-                    className="card-text"
-                    style={{ fontFamily: "Outfit, sans-serif", fontWeight: "300" }}
-                  >
-                    Get expert guidance and telehealth options for smarter healthcare decisions.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
+          </motion.h2>
+          <div className="row justify-content-center">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i}>
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  transition={{ duration: 0.3 }}
+                  className="card h-100 border-0"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    backdropFilter: "blur(10px)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                  }}
+                >
+                  <div className="card-body text-center">
+                    {[BiDollarCircle, BiHeart, BiCheckShield][i]({
+                      className: "mb-3 text-primary",
+                      style: { fontSize: "2.5rem", color: "#3AADA4" },
+                    })}
+                    <h3
+                      className="card-title h5 mb-3"
+                      style={{ color: "#241A90", fontFamily: "'Outfit', sans-serif" }}
+                    >
+                      {["Transparent Pricing", "Personalized Care", "Quality Assurance"][i]}
+                    </h3>
+                    <p
+                      className="card-text"
+                      style={{ color: "#333333", fontFamily: "'Inter', sans-serif" }}
+                    >
+                      {[
+                        "Get real-time price comparisons for medical procedures across hospitals in your area.",
+                        "Receive tailored recommendations based on your specific medical needs and preferences.",
+                        "Access verified reviews and ratings to make informed decisions about your healthcare.",
+                      ][i]}
+                    </p>
+                  </div>
+                </motion.div>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="text-center p-4 text-muted bg-white shadow-sm border-top border-dark">
-        © 2025 SureCare. All rights reserved.
-      </footer>
+      <Footer />
     </motion.div>
   );
 };
