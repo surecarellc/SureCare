@@ -8,6 +8,7 @@ import { geocodeAddress } from "./services/userService";
 import LoadingPage from "./components/LoadingPage";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import { FaMoneyBillWave, FaHandshake } from "react-icons/fa";
 
 const mapContainerStyle = {
   width: "100%",
@@ -210,8 +211,8 @@ const Results = () => {
     >
       <Navbar />
       <div className="row w-100 d-flex justify-content-center align-items-start flex-grow-1 mt-2">
-        <div className="col-md-6">
-          <div className="d-flex justify-content-between mb-3">
+        <div className="col-md-8 ps-2">
+          <div className="d-flex justify-content-start mb-2" style={{ gap: "1rem", flexWrap: "wrap" }}>
             <div className="btn-group" style={{ position: "relative" }}>
               <button
                 type="button"
@@ -223,11 +224,10 @@ const Results = () => {
                 }}
                 style={{
                   backgroundColor: isProcessingLocation ? "#6c757d" : "#343A40",
-                  border: "1px solid",
-                  borderColor: isProcessingLocation ? "#6c757d" : "#343A40",
+                  border: "3px solid #26a69a",
                   borderRadius: "20px",
                   fontSize: "0.9rem",
-                  transition: "background-color 0.3s ease, border-color 0.3s ease",
+                  transition: "background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease",
                   display: "flex",
                   alignItems: "center",
                   cursor: isProcessingLocation ? "not-allowed" : "pointer",
@@ -238,13 +238,15 @@ const Results = () => {
                 onMouseOver={(e) => {
                   if (!isProcessingLocation) {
                     e.target.style.backgroundColor = "#495057";
-                    e.target.style.borderColor = "#495057";
+                    e.target.style.borderColor = "#4db6ac";
+                    e.target.style.transform = "scale(1.05)";
                   }
                 }}
                 onMouseOut={(e) => {
                   if (!isProcessingLocation) {
                     e.target.style.backgroundColor = "#343A40";
-                    e.target.style.borderColor = "#343A40";
+                    e.target.style.borderColor = "#26a69a";
+                    e.target.style.transform = "scale(1)";
                   }
                 }}
                 disabled={isProcessingLocation}
@@ -287,20 +289,22 @@ const Results = () => {
                 aria-expanded="false"
                 style={{
                   backgroundColor: "#343A40",
-                  border: "1px solid #343A40",
+                  border: "3px solid #26a69a",
                   borderRadius: "20px",
-                  transition: "background-color 0.3s ease, border-color 0.3s ease",
+                  transition: "background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease",
                   fontSize: "0.9rem",
                   display: "flex",
                   alignItems: "center",
                 }}
                 onMouseOver={(e) => {
                   e.target.style.backgroundColor = "#495057";
-                  e.target.style.borderColor = "#495057";
+                  e.target.style.borderColor = "#4db6ac";
+                  e.target.style.transform = "scale(1.05)";
                 }}
                 onMouseOut={(e) => {
                   e.target.style.backgroundColor = "#343A40";
-                  e.target.style.borderColor = "#343A40";
+                  e.target.style.borderColor = "#26a69a";
+                  e.target.style.transform = "scale(1)";
                 }}
               >
                 Filter By
@@ -309,40 +313,6 @@ const Results = () => {
                 <p className="text-muted mb-0">Filter options coming soon...{selectedInsurance ? ` (Selected Insurance: ${selectedInsurance})` : ""}</p>
               </div>
             </div>
-          </div>
-          <div className="card shadow-lg" style={{ borderRadius: "20px", maxHeight: "610px", overflowY: "auto", width: "100%", textAlign: "left" }} aria-live="polite">
-            <div className="card-body p-4">
-              <h3 className="fw-bold mb-2">Top Matches</h3>
-              <hr className="my-3" style={{ borderTop: "2px solid #ddd" }} />
-              {filteredResults.length === 0 ? (
-                <p className="text-muted">No results found within the selected radius.</p>
-              ) : (
-                filteredResults.map((result, index) => (
-                  <div
-                    key={index}
-                    className="border-bottom pb-4 mb-4"
-                    onClick={() => panToLocation(result.lat, result.lng)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <div className="d-flex justify-content-between align-items-center">
-                      <h5 className="fw-bold mb-0">{result.name || "Unknown Name"}</h5>
-                      <div className="badge bg-secondary text-white px-3 py-2 rounded-pill" style={{ fontSize: "0.9rem" }}>
-                        Price: N/A
-                      </div>
-                    </div>
-                    <div className="text-muted mt-2">
-                      Address: {result.address || "N/A"} <br />
-                      Rating: {result.rating ?? "N/A"}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6 mb-4">
-          <div className="d-flex justify-content-between mb-3">
             <div className="btn-group">
               <button
                 type="button"
@@ -350,9 +320,9 @@ const Results = () => {
                 onClick={() => setShowAddressPopup(true)}
                 style={{
                   backgroundColor: "#343A40",
-                  border: "1px solid #343A40",
+                  border: "3px solid #26a69a",
                   borderRadius: "20px",
-                  transition: "background-color 0.3s ease, border-color 0.3s ease",
+                  transition: "background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease",
                   fontSize: "0.9rem",
                   display: "flex",
                   alignItems: "center",
@@ -362,11 +332,13 @@ const Results = () => {
                 }}
                 onMouseOver={(e) => {
                   e.target.style.backgroundColor = "#495057";
-                  e.target.style.borderColor = "#495057";
+                  e.target.style.borderColor = "#4db6ac";
+                  e.target.style.transform = "scale(1.05)";
                 }}
                 onMouseOut={(e) => {
                   e.target.style.backgroundColor = "#343A40";
-                  e.target.style.borderColor = "#343A40";
+                  e.target.style.borderColor = "#26a69a";
+                  e.target.style.transform = "scale(1)";
                 }}
                 disabled={isProcessingLocation}
                 aria-label={searchLocation.address !== "Unknown Location" ? `Edit location: ${searchLocation.address}` : "Set location"}
@@ -379,25 +351,27 @@ const Results = () => {
             <div className="btn-group">
               <button
                 type="button"
-                className="btn dropdown-toggle text-white px-3 py-1"
+                className="btn dropdown-toggle text-white px-2 py-1"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
                 style={{
                   backgroundColor: "#343A40",
-                  border: "1px solid #343A40",
+                  border: "3px solid #26a69a",
                   borderRadius: "20px",
-                  transition: "background-color 0.3s ease, border-color 0.3s ease",
+                  transition: "background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease",
                   fontSize: "0.9rem",
                   display: "flex",
                   alignItems: "center",
                 }}
                 onMouseOver={(e) => {
                   e.target.style.backgroundColor = "#495057";
-                  e.target.style.borderColor = "#495057";
+                  e.target.style.borderColor = "#4db6ac";
+                  e.target.style.transform = "scale(1.05)";
                 }}
                 onMouseOut={(e) => {
                   e.target.style.backgroundColor = "#343A40";
-                  e.target.style.borderColor = "#343A40";
+                  e.target.style.borderColor = "#26a69a";
+                  e.target.style.transform = "scale(1)";
                 }}
               >
                 Adjust Radius: {radius} mi
@@ -419,12 +393,69 @@ const Results = () => {
               </div>
             </div>
           </div>
+          <div className="card shadow-lg" style={{ borderRadius: "20px", maxHeight: "610px", overflowY: "auto", width: "100%", textAlign: "left" }} aria-live="polite">
+            <div className="card-body p-4">
+              <h3 className="fw-bold mb-2">Top Matches</h3>
+              <hr className="my-3" style={{ borderTop: "2px solid #ddd" }} />
+              {filteredResults.length === 0 ? (
+                <p className="text-muted">No results found within the selected radius.</p>
+              ) : (
+                filteredResults.map((result, index) => (
+                  <div
+                    key={index}
+                    className="border-bottom pb-4 mb-4"
+                    onClick={() => panToLocation(result.lat, result.lng)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className="d-flex justify-content-between align-items-center">
+                      <h5 className="fw-bold mb-0">{result.name || "Unknown Name"}</h5>
+                      <div className="d-flex flex-column align-items-end text-end" style={{ minWidth: "190px" }}>
+                        <div
+                          className="d-flex align-items-center mb-1 px-3 py-1 rounded-pill shadow-sm"
+                          style={{
+                            backgroundColor: "#e3f2fd",
+                            color: "#1565c0",
+                            fontWeight: "500",
+                            fontSize: "0.85rem",
+                            gap: "0.5rem",
+                          }}
+                        >
+                          <FaMoneyBillWave size={14} />
+                          Cash Price: <span>N/A</span>
+                        </div>
+                        <div
+                          className="d-flex align-items-center px-3 py-1 rounded-pill shadow-sm"
+                          style={{
+                            backgroundColor: "#f3e5f5",
+                            color: "#6a1b9a",
+                            fontWeight: "500",
+                            fontSize: "0.85rem",
+                            gap: "0.5rem",
+                          }}
+                        >
+                          <FaHandshake size={14} />
+                          Negotiated Price: <span>N/A</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-muted mt-2">
+                      Address: {result.address || "N/A"} <br />
+                      Rating: {result.rating ?? "N/A"}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-4 mb-4" style={{ marginTop: "48px" }}>
           <div className="card shadow-lg" style={{ borderRadius: "20px", height: "610px", backgroundColor: "#f8f9fa" }}>
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
               zoom={10}
               center={mapCenter}
-              onLoad={(map) => (mapRef.current = map)}
+              onLoad={( Freddie) => (mapRef.current = Freddie)}
             >
               {filteredResults.map((result, index) =>
                 result.lat && result.lng ? (
@@ -447,18 +478,20 @@ const Results = () => {
           onClick={() => goToQuestionnairePage({ insurance: selectedInsurance, searchLocation })}
           style={{
             backgroundColor: "#343A40",
-            border: "1px solid #343A40",
+            border: "3px solid #26a69a",
             borderRadius: "20px",
-            transition: "background-color 0.3s ease, border-color 0.3s ease",
+            transition: "background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease",
             fontSize: "0.9rem",
           }}
           onMouseOver={(e) => {
             e.target.style.backgroundColor = "#495057";
-            e.target.style.borderColor = "#495057";
+            e.target.style.borderColor = "#4db6ac";
+            e.target.style.transform = "scale(1.05)";
           }}
           onMouseOut={(e) => {
             e.target.style.backgroundColor = "#343A40";
-            e.target.style.borderColor = "#343A40";
+            e.target.style.borderColor = "#26a69a";
+            e.target.style.transform = "scale(1)";
           }}
         >
           Back to Questionnaire
