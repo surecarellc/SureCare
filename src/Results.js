@@ -1,14 +1,13 @@
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTimes, FaMapMarkerAlt, FaShieldAlt } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
+import { FaTimes, FaMapMarkerAlt, FaShieldAlt, FaFileMedical } from "react-icons/fa";
+import { useLocation, useNavigate } from "react-router-dom";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
-import { useNavigation } from "./utils/goToFunctions.js";
-import { geocodeAddress } from "./services/userService";
 import LoadingPage from "./components/LoadingPage";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { FaMoneyBillWave, FaHandshake } from "react-icons/fa";
+import { geocodeAddress } from "./services/userService";
 
 const mapContainerStyle = {
   width: "100%",
@@ -33,8 +32,32 @@ function getDistanceMiles(lat1, lng1, lat2, lng2) {
   return R * c;
 }
 
+const insuranceCompanies = [
+  "No Insurance",
+  "UnitedHealthcare",
+  "Blue Cross Blue Shield",
+  "Aetna",
+  "Cigna",
+  "Humana",
+  "Kaiser Permanente",
+  "Anthem",
+  "Molina Healthcare",
+];
+
+const insurancePlans = {
+  "No Insurance": [],
+  "UnitedHealthcare": ["Choice Plus", "Select", "Navigate"],
+  "Blue Cross Blue Shield": ["PPO", "HMO", "High Deductible"],
+  "Aetna": ["Choice POS", "Managed Choice", "Open Access"],
+  "Cigna": ["Open Access Plus", "LocalPlus", "HMO"],
+  "Humana": ["ChoiceCare PPO", "HMO Premier", "National POS"],
+  "Kaiser Permanente": ["HMO", "Deductible HMO", "Senior Advantage"],
+  "Anthem": ["PPO", "Blue Access", "Blue Preferred"],
+  "Molina Healthcare": ["Marketplace Silver", "Marketplace Gold", "Core Care"],
+};
+
 const Results = () => {
-  const { goToQuestionnairePage } = useNavigation();
+  const navigate = useNavigate();
   const location = useLocation();
   const allResults = useMemo(() => {
     const rawState = location.state;
@@ -55,7 +78,8 @@ const Results = () => {
     address: "Unknown Location",
   };
   const [searchLocation, setSearchLocation] = useState(initialSearchLocation);
-  const [selectedInsurance, setSelectedInsurance] = useState(location.state?.insurance || "");
+  const [selectedProvider, setSelectedProvider] = useState(location.state?.insurance?.provider || "No Insurance");
+  const [selectedPlan, setSelectedPlan] = useState(location.state?.insurance?.plan || "");
   const mapCenter = {
     lat: searchLocation.lat,
     lng: searchLocation.lng,
@@ -69,27 +93,24 @@ const Results = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
   const debounceTimerRef = useRef(null);
-  const [showLoading, setShowLoading] = useState(true);
-
-  const insuranceCompanies = [
-    "No Insurance",
-    "UnitedHealthcare",
-    "Blue Cross Blue Shield",
-    "Aetna",
-    "Cigna",
-    "Humana",
-    "Kaiser Permanente",
-    "Anthem",
-    "Molina Healthcare",
-  ];
+  const [showLoading, setShowLoading] = useState(location.state?.loading || true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLoading(false);
-    }, 2000);
+    console.log("Results.js location.state:", location.state);
+    if (location.state?.insurance) {
+      setSelectedProvider(location.state.insurance.provider || "No Insurance");
+      setSelectedPlan(location.state.insurance.plan || "");
+    }
+    if (location.state?.searchLocation) {
+      setSearchLocation(location.state.searchLocation);
+    }
+  }, [location.state]);
 
-    return () => clearTimeout(timer);
-  }, []);
+  useEffect(() => {
+    if (isLoaded && allResults.length > 0) {
+      setShowLoading(false);
+    }
+  }, [isLoaded, allResults]);
 
   const filteredResults = useMemo(() => {
     if (allResults.length === 0) return [];
@@ -197,7 +218,7 @@ const Results = () => {
     </div>
   );
 
-  if (!isLoaded || showLoading) {
+  if (showLoading || !isLoaded || allResults.length === 0) {
     return <LoadingPage />;
   }
 
@@ -212,13 +233,16 @@ const Results = () => {
       <Navbar />
       <div className="row w-100 d-flex justify-content-center align-items-start flex-grow-1 mt-2">
         <div className="col-md-8 ps-2">
-          <div className="d-flex justify-content-start mb-2" style={{ gap: "1rem", flexWrap: "wrap" }}>
-            <div className="btn-group" style={{ position: "relative" }}>
+          <div
+            className="d-flex justify-content-start mb-2"
+            style={{ gap: "0.5rem", flexWrap: "nowrap", overflowX: "auto" }}
+          >
+            <div className="btn-group" style={{ position: "relative", flex: "0 0 auto", minWidth: "150px" }}>
               <button
                 type="button"
                 className="btn text-white px-3 py-1"
                 onClick={() => {
-                  const select = document.getElementById("insurance");
+                  const select = document.getElementById("insuranceProvider");
                   select.focus();
                   select.click();
                 }}
@@ -234,6 +258,7 @@ const Results = () => {
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
+                  width: "100%",
                 }}
                 onMouseOver={(e) => {
                   if (!isProcessingLocation) {
@@ -251,15 +276,18 @@ const Results = () => {
                 }}
                 disabled={isProcessingLocation}
                 aria-label="Select insurance provider"
-                title={selectedInsurance || "Select Insurance"}
+                title={selectedProvider || "No Insurance"}
               >
                 <FaShieldAlt size={14} style={{ marginRight: "0.5rem" }} />
-                {selectedInsurance || "Select Insurance"}
+                {selectedProvider || "No Insurance"}
               </button>
               <select
-                id="insurance"
-                value={selectedInsurance}
-                onChange={(e) => setSelectedInsurance(e.target.value)}
+                id="insuranceProvider"
+                value={selectedProvider}
+                onChange={(e) => {
+                  setSelectedProvider(e.target.value);
+                  setSelectedPlan(""); // Reset plan only when user changes provider
+                }}
                 style={{
                   position: "absolute",
                   top: 0,
@@ -281,7 +309,78 @@ const Results = () => {
                 ))}
               </select>
             </div>
-            <div className="btn-group">
+            <div className="btn-group" style={{ position: "relative", flex: "0 0 auto", minWidth: "150px" }}>
+              <button
+                type="button"
+                className="btn text-white px-3 py-1"
+                onClick={() => {
+                  if (selectedProvider && selectedProvider !== "No Insurance") {
+                    const select = document.getElementById("insurancePlan");
+                    select.focus();
+                    select.click();
+                  }
+                }}
+                style={{
+                  backgroundColor: selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation ? "#343A40" : "#6c757d",
+                  border: "3px solid #26a69a",
+                  borderRadius: "20px",
+                  fontSize: "0.9rem",
+                  transition: "background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  cursor: selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation ? "pointer" : "not-allowed",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  width: "100%",
+                }}
+                onMouseOver={(e) => {
+                  if (selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation) {
+                    e.target.style.backgroundColor = "#495057";
+                    e.target.style.borderColor = "#4db6ac";
+                    e.target.style.transform = "scale(1.05)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation) {
+                    e.target.style.backgroundColor = "#343A40";
+                    e.target.style.borderColor = "#26a69a";
+                    e.target.style.transform = "scale(1)";
+                  }
+                }}
+                disabled={!selectedProvider || isProcessingLocation || selectedProvider === "No Insurance"}
+                aria-label="Select insurance plan"
+                title={selectedPlan || "Select Plan"}
+              >
+                <FaFileMedical size={14} style={{ marginRight: "0.5rem" }} />
+                {selectedPlan || "Select Plan"}
+              </button>
+              <select
+                id="insurancePlan"
+                value={selectedPlan}
+                onChange={(e) => setSelectedPlan(e.target.value)}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  opacity: 0,
+                  cursor: selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation ? "pointer" : "not-allowed",
+                }}
+                disabled={!selectedProvider || isProcessingLocation || selectedProvider === "No Insurance"}
+              >
+                <option value="" disabled>
+                  Select Plan
+                </option>
+                {selectedProvider && insurancePlans[selectedProvider].map((plan, idx) => (
+                  <option key={idx} value={plan}>
+                    {plan}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="btn-group" style={{ flex: "0 0 auto", minWidth: "120px" }}>
               <button
                 type="button"
                 className="btn dropdown-toggle text-white px-3 py-1"
@@ -310,16 +409,18 @@ const Results = () => {
                 Filter By
               </button>
               <div className="dropdown-menu p-2" style={{ minWidth: "300px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
-                <p className="text-muted mb-0">Filter options coming soon...{selectedInsurance ? ` (Selected Insurance: ${selectedInsurance})` : ""}</p>
+                <p className="text-muted mb-0">
+                  Filter options coming soon...{selectedProvider ? ` (Selected: ${selectedProvider}${selectedPlan ? `, ${selectedPlan}` : ""})` : ""}
+                </p>
               </div>
             </div>
-            <div className="btn-group">
+            <div className="btn-group" style={{ flex: "0 0 auto", minWidth: "200px" }}>
               <button
                 type="button"
                 className="btn text-white px-3 py-1"
                 onClick={() => setShowAddressPopup(true)}
                 style={{
-                  backgroundColor: "#343A40",
+                  backgroundColor: isProcessingLocation ? "#6c757d" : "#343A40",
                   border: "3px solid #26a69a",
                   borderRadius: "20px",
                   transition: "background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease",
@@ -329,16 +430,21 @@ const Results = () => {
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
+                  width: "100%",
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.backgroundColor = "#495057";
-                  e.target.style.borderColor = "#4db6ac";
-                  e.target.style.transform = "scale(1.05)";
+                  if (!isProcessingLocation) {
+                    e.target.style.backgroundColor = "#495057";
+                    e.target.style.borderColor = "#4db6ac";
+                    e.target.style.transform = "scale(1.05)";
+                  }
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.backgroundColor = "#343A40";
-                  e.target.style.borderColor = "#26a69a";
-                  e.target.style.transform = "scale(1)";
+                  if (!isProcessingLocation) {
+                    e.target.style.backgroundColor = "#343A40";
+                    e.target.style.borderColor = "#26a69a";
+                    e.target.style.transform = "scale(1)";
+                  }
                 }}
                 disabled={isProcessingLocation}
                 aria-label={searchLocation.address !== "Unknown Location" ? `Edit location: ${searchLocation.address}` : "Set location"}
@@ -347,50 +453,6 @@ const Results = () => {
                 <FaMapMarkerAlt size={14} style={{ marginRight: "0.5rem" }} />
                 {searchLocation.address !== "Unknown Location" ? `Location: ${searchLocation.address}` : "Set Location"}
               </button>
-            </div>
-            <div className="btn-group">
-              <button
-                type="button"
-                className="btn dropdown-toggle text-white px-2 py-1"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                style={{
-                  backgroundColor: "#343A40",
-                  border: "3px solid #26a69a",
-                  borderRadius: "20px",
-                  transition: "background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease",
-                  fontSize: "0.9rem",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = "#495057";
-                  e.target.style.borderColor = "#4db6ac";
-                  e.target.style.transform = "scale(1.05)";
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = "#343A40";
-                  e.target.style.borderColor = "#26a69a";
-                  e.target.style.transform = "scale(1)";
-                }}
-              >
-                Adjust Radius: {radius} mi
-              </button>
-              <div className="dropdown-menu p-2" style={{ minWidth: "300px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
-                <div className="text-center mb-2">
-                  <strong>{radius} mile{radius > 1 ? "s" : ""}</strong>
-                </div>
-                <input
-                  type="range"
-                  id="dropdownRadiusRange"
-                  min="1"
-                  max="50"
-                  step="1"
-                  value={radius}
-                  onChange={(e) => setRadius(Number(e.target.value))}
-                  style={{ width: "100%" }}
-                />
-              </div>
             </div>
           </div>
           <div className="card shadow-lg" style={{ borderRadius: "20px", maxHeight: "610px", overflowY: "auto", width: "100%", textAlign: "left" }} aria-live="polite">
@@ -449,13 +511,59 @@ const Results = () => {
           </div>
         </div>
 
-        <div className="col-md-4 mb-4" style={{ marginTop: "48px" }}>
+        <div className="col-md-4" style={{ marginTop: "48px" }}>
+          <div className="d-flex justify-content-start mb-2" style={{ marginTop: "-48px" }}>
+            <div className="btn-group" style={{ minWidth: "150px" }}>
+              <button
+                type="button"
+                className="btn dropdown-toggle text-white px-2 py-1"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                style={{
+                  backgroundColor: "#343A40",
+                  border: "3px solid #26a69a",
+                  borderRadius: "20px",
+                  transition: "background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease",
+                  fontSize: "0.9rem",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = "#495057";
+                  e.target.style.borderColor = "#4db6ac";
+                  e.target.style.transform = "scale(1.05)";
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = "#343A40";
+                  e.target.style.borderColor = "#26a69a";
+                  e.target.style.transform = "scale(1)";
+                }}
+              >
+                Adjust Radius: {radius} mi
+              </button>
+              <div className="dropdown-menu p-2" style={{ minWidth: "300px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
+                <div className="text-center mb-2">
+                  <strong>{radius} mile{radius > 1 ? "s" : ""}</strong>
+                </div>
+                <input
+                  type="range"
+                  id="dropdownRadiusRange"
+                  min="1"
+                  max="50"
+                  step="1"
+                  value={radius}
+                  onChange={(e) => setRadius(Number(e.target.value))}
+                  style={{ width: "100%" }}
+                />
+              </div>
+            </div>
+          </div>
           <div className="card shadow-lg" style={{ borderRadius: "20px", height: "610px", backgroundColor: "#f8f9fa" }}>
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
               zoom={10}
               center={mapCenter}
-              onLoad={( Freddie) => (mapRef.current = Freddie)}
+              onLoad={(map) => (mapRef.current = map)}
             >
               {filteredResults.map((result, index) =>
                 result.lat && result.lng ? (
@@ -475,7 +583,12 @@ const Results = () => {
         <button
           type="button"
           className="btn text-white px-3 py-1"
-          onClick={() => goToQuestionnairePage({ insurance: selectedInsurance, searchLocation })}
+          onClick={() => navigate("/questionnaire", { 
+            state: { 
+              insurance: { provider: selectedProvider, plan: selectedPlan }, 
+              searchLocation 
+            }
+          })}
           style={{
             backgroundColor: "#343A40",
             border: "3px solid #26a69a",
@@ -623,7 +736,6 @@ const Results = () => {
                           color: "#333",
                           background: "#fff",
                           transition: "background 0.2s ease",
-                          textAlign: "left",
                         }}
                         onMouseDown={() => {
                           setNewAddress(s.short_display_name);
@@ -652,11 +764,15 @@ const Results = () => {
                     fontWeight: "bold",
                     border: "none",
                     borderRadius: "8px",
-                    cursor: "pointer",
+                    cursor: isProcessingLocation ? "not-allowed" : "pointer",
                     transition: "background 0.2s ease",
                   }}
-                  onMouseOver={(e) => (e.currentTarget.style.background = "#3b2dbb")}
-                  onMouseOut={(e) => (e.currentTarget.style.background = "#241A90")}
+                  onMouseOver={(e) => {
+                    if (!isProcessingLocation) e.currentTarget.style.background = "#3b2dbb";
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isProcessingLocation) e.currentTarget.style.background = "#241A90";
+                  }}
                   disabled={isProcessingLocation}
                 >
                   Use This Address

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaArrowRight, FaTimes, FaMapMarkerAlt, FaShieldAlt } from "react-icons/fa";
+import { FaArrowRight, FaTimes, FaMapMarkerAlt, FaShieldAlt, FaFileMedical } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -9,6 +9,7 @@ import LoadingPage from "./components/LoadingPage";
 
 const STORAGE_KEY = "chatMessages";
 const TOP_PADDING = 2;
+const MIN_LOADING_DURATION = 2000;
 
 const Questionnaire = () => {
   const navigate = useNavigate();
@@ -30,8 +31,10 @@ const Questionnaire = () => {
   });
   const [geoError, setGeoError] = useState(null);
   const [showGeoErrorBanner, setShowGeoErrorBanner] = useState(false);
-  const [selectedInsurance, setSelectedInsurance] = useState(location.state?.insurance || "");
-  // Initialize showAddressPopup without isDeviceGeoAvailable
+  const [selectedProvider, setSelectedProvider] = useState(location.state?.insurance?.provider || "No Insurance");
+  const [selectedPlan, setSelectedPlan] = useState(location.state?.insurance?.plan || "");
+  const [cptCodeType, setCptCodeType] = useState(location.state?.cpt?.codeType || "");
+  const [cptValues, setCptValues] = useState(location.state?.cpt?.values || "");
   const [showAddressPopup, setShowAddressPopup] = useState(
     !location.state?.searchLocation && !(coords.lat !== null && !geoError)
   );
@@ -54,11 +57,23 @@ const Questionnaire = () => {
     "Molina Healthcare",
   ];
 
-  // Update selectedInsurance and location when location.state changes
+  const insurancePlans = {
+    "No Insurance": [],
+    "UnitedHealthcare": ["Choice Plus", "Select", "Navigate"],
+    "Blue Cross Blue Shield": ["PPO", "HMO", "High Deductible"],
+    "Aetna": ["Choice POS", "Managed Choice", "Open Access"],
+    "Cigna": ["Open Access Plus", "LocalPlus", "HMO"],
+    "Humana": ["ChoiceCare PPO", "HMO Premier", "National POS"],
+    "Kaiser Permanente": ["HMO", "Deductible HMO", "Senior Advantage"],
+    "Anthem": ["PPO", "Blue Access", "Blue Preferred"],
+    "Molina Healthcare": ["Marketplace Silver", "Marketplace Gold", "Core Care"],
+  };
+
   useEffect(() => {
     console.log("Questionnaire.js location.state:", location.state);
     if (location.state?.insurance) {
-      setSelectedInsurance(location.state.insurance);
+      setSelectedProvider(location.state.insurance.provider || "No Insurance");
+      setSelectedPlan(location.state.insurance.plan || "");
     }
     if (location.state?.searchLocation) {
       setAddress(location.state.searchLocation.address || "");
@@ -66,7 +81,11 @@ const Questionnaire = () => {
         lat: location.state.searchLocation.lat || null,
         lng: location.state.searchLocation.lng || null,
       });
-      setShowAddressPopup(false); // Avoid showing popup if searchLocation exists
+      setShowAddressPopup(false);
+    }
+    if (location.state?.cpt) {
+      setCptCodeType(location.state.cpt.codeType || "");
+      setCptValues(location.state.cpt.values || "");
     }
   }, [location.state]);
 
@@ -94,8 +113,9 @@ const Questionnaire = () => {
   }, [geoError]);
 
   const isDeviceGeoAvailable = coords.lat !== null && !geoError;
-  const isAddressEntered = address.trim() !== "";
-  const isSearchDisabled = isProcessingLocation || (!isAddressEntered && !isDeviceGeoAvailable);
+  const isAddressEntered = address.trim() !== "" && address !== "Current Device Location";
+  const isCptValid = cptCodeType.trim() !== "" && cptValues.trim() !== "";
+  const isSearchDisabled = isProcessingLocation || (!isAddressEntered && !isDeviceGeoAvailable) || !isCptValid;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -138,12 +158,12 @@ const Questionnaire = () => {
     let searchLng = null;
     let searchAddressString = "Unknown Location";
 
-    if (selectedSuggestion && address === selectedSuggestion.short_display_name) {
-      searchLat = parseFloat(selectedSuggestion.lat);
-      searchLng = parseFloat(selectedSuggestion.lon);
-      searchAddressString = address;
-    } else if (isAddressEntered) {
-      try {
+    try {
+      if (selectedSuggestion && address === selectedSuggestion.short_display_name) {
+        searchLat = parseFloat(selectedSuggestion.lat);
+        searchLng = parseFloat(selectedSuggestion.lon);
+        searchAddressString = address;
+      } else if (isAddressEntered) {
         console.log(`Attempting to geocode user-entered address: "${address}"`);
         const geocodedData = await geocodeAddress(address);
         if (geocodedData && typeof geocodedData.lat === "number" && typeof geocodedData.lng === "number") {
@@ -156,45 +176,46 @@ const Questionnaire = () => {
           setIsProcessingLocation(false);
           return;
         }
-      } catch (error) {
-        console.error("Geocoding API error for address:", address, error);
-        alert(`There was an error trying to find the location for "${address}": ${error.message}. Please try again, or clear the address to use your device's location.`);
+      } else if (isDeviceGeoAvailable) {
+        console.log("Using device geolocation.");
+        searchLat = coords.lat;
+        searchLng = coords.lng;
+        searchAddressString = "Current Device Location";
+      } else {
+        alert("Location is not available. Please enter a valid address or enable device location services.");
         setIsProcessingLocation(false);
         return;
       }
-    } else if (isDeviceGeoAvailable) {
-      console.log("Using device geolocation.");
-      searchLat = coords.lat;
-      searchLng = coords.lng;
-      searchAddressString = "Current Device Location";
-    } else {
-      alert("Location is not available. Please enter a valid address or enable device location services.");
-      setIsProcessingLocation(false);
-      return;
-    }
 
-    try {
       console.log(`Fetching hospitals for: ${searchAddressString} (Lat: ${searchLat}, Lng: ${searchLng})`);
       const hospitals = await getLocationPrices(searchLat, searchLng, 5);
 
       const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(0, 2000 - elapsedTime);
+      const remainingTime = Math.max(0, MIN_LOADING_DURATION - elapsedTime);
 
       if (remainingTime > 0) {
         await new Promise((resolve) => setTimeout(resolve, remainingTime));
       }
 
+      console.log("Navigating to /results with state:", {
+        results: hospitals,
+        searchLocation: { lat: searchLat, lng: searchLng, address: searchAddressString },
+        insurance: { provider: selectedProvider, plan: selectedPlan },
+        cpt: { codeType: cptCodeType, values: cptValues },
+        loading: true,
+      });
       navigate("/results", {
         state: {
           results: hospitals,
           searchLocation: { lat: searchLat, lng: searchLng, address: searchAddressString },
-          insurance: selectedInsurance,
+          insurance: { provider: selectedProvider, plan: selectedPlan },
+          cpt: { codeType: cptCodeType, values: cptValues },
+          loading: true,
         },
       });
     } catch (e) {
       console.error("Failed to fetch hospital data:", e);
       alert("Failed to fetch hospital data. Please try again later.");
-    } finally {
       setIsProcessingLocation(false);
     }
   };
@@ -266,7 +287,7 @@ const Questionnaire = () => {
     if (isAddressEntered) {
       return address;
     } else if (isDeviceGeoAvailable) {
-      return "Current Location";
+      return "Current Device Location";
     } else {
       return "Enter Address";
     }
@@ -291,10 +312,10 @@ const Questionnaire = () => {
           ref={chatRef}
           style={{
             marginTop: `${TOP_PADDING}rem`,
-            height: `calc(100vh - ${TOP_PADDING}rem - 13rem)`,
+            height: `calc(100vh - ${TOP_PADDING}rem - 16rem)`,
             overflowY: "auto",
             padding: "1rem",
-            paddingBottom: "9rem",
+            paddingBottom: "10rem",
             scrollbarGutter: "stable",
           }}
           className="d-flex flex-column align-items-center"
@@ -348,25 +369,392 @@ const Questionnaire = () => {
               Location Error: {geoError}. Please enable location services or enter an address manually.
             </motion.div>
           )}
-          {isProcessingLocation && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="d-flex justify-content-start mb-2"
+        </div>
+
+        <div
+          style={{
+            position: "fixed",
+            bottom: "6rem",
+            left: 0,
+            right: 0,
+            margin: "0 auto",
+            width: "100%",
+            maxWidth: "700px",
+            paddingLeft: "1rem",
+            paddingRight: "1rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.75rem",
+            zIndex: 100,
+            boxSizing: "border-box",
+            backgroundColor: "white",
+          }}
+        >
+          <div
+            className="input-group"
+            style={{
+              background: "#f8f9fa",
+              border: "2px solid #ced4da",
+              borderRadius: 20,
+              overflow: "hidden",
+              padding: "0.5rem",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            }}
+          >
+            <textarea
+              className="form-control border-0 bg-transparent"
+              placeholder="Type your symptoms or preferences…"
+              rows={1}
+              style={{ resize: "none", boxShadow: "none" }}
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyPress}
+              disabled={isProcessingLocation}
+            />
+            <button
+              className="btn"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#241A90",
+                color: "#fff",
+                border: "none",
+                borderRadius: "50%",
+                width: 40,
+                height: 40,
+                padding: 0,
+                lineHeight: 0,
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.background = "#3b2dbb")}
+              onMouseOut={(e) => (e.currentTarget.style.background = "#241A90")}
+              onClick={handleSubmit}
+              disabled={isProcessingLocation}
             >
-              <div
-                style={{
-                  background: "#e9ecef",
-                  borderRadius: "16px",
-                  padding: "0.75rem 1.25rem",
-                  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+              <FaArrowRight size={16} />
+            </button>
+          </div>
+
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <div style={{ flex: 1, position: "relative", maxWidth: "calc(25% - 0.375rem)" }}>
+              <button
+                onClick={() => {
+                  const select = document.getElementById("insuranceProvider");
+                  select.focus();
+                  select.click();
                 }}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  background: isProcessingLocation ? "#e9ecef" : "#3AADA4",
+                  color: isProcessingLocation ? "#6c757d" : "#fff",
+                  padding: "0.75rem 0.5rem 0.75rem 2.5rem",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
+                  transition: "all 0.3s ease",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  boxShadow: isProcessingLocation ? "none" : "0 3px 6px rgba(58, 173, 164, 0.3)",
+                  width: "100%",
+                  height: "44px",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  if (!isProcessingLocation) {
+                    e.currentTarget.style.background = "#2e8b7f";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isProcessingLocation) {
+                    e.currentTarget.style.background = "#3AADA4";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }
+                }}
+                disabled={isProcessingLocation}
+                aria-label={`Insurance provider: ${selectedProvider || "No Insurance"}`}
+                title={selectedProvider || "No Insurance"}
               >
-                <LoadingPage />
-              </div>
-            </motion.div>
-          )}
+                <FaShieldAlt
+                  size={16}
+                  style={{
+                    position: "absolute",
+                    left: "1rem",
+                    color: isProcessingLocation ? "#6c757d" : "#fff",
+                  }}
+                />
+                <span
+                  style={{
+                    display: "block",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    maxWidth: "calc(100% - 0.25rem)",
+                  }}
+                >
+                  {selectedProvider || "No Insurance"}
+                </span>
+              </button>
+              <select
+                id="insuranceProvider"
+                value={selectedProvider}
+                onChange={(e) => {
+                  setSelectedProvider(e.target.value);
+                  setSelectedPlan(""); // Reset plan only when user changes provider
+                }}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  opacity: 0,
+                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
+                }}
+                disabled={isProcessingLocation}
+              >
+                <option value="" disabled>
+                  Select Insurance
+                </option>
+                {insuranceCompanies.map((company, idx) => (
+                  <option key={idx} value={company}>
+                    {company}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ flex: 1, position: "relative", maxWidth: "calc(25% - 0.375rem)" }}>
+              <button
+                onClick={() => {
+                  if (selectedProvider && selectedProvider !== "No Insurance") {
+                    const select = document.getElementById("insurancePlan");
+                    select.focus();
+                    select.click();
+                  }
+                }}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  background: selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation ? "#3AADA4" : "#e9ecef",
+                  color: selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation ? "#fff" : "#6c757d",
+                  padding: "0.75rem 0.5rem 0.75rem 2.5rem",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation ? "pointer" : "not-allowed",
+                  transition: "all 0.3s ease",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  boxShadow: selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation ? "0 3px 6px rgba(58, 173, 164, 0.3)" : "none",
+                  width: "100%",
+                  height: "44px",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  if (selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation) {
+                    e.currentTarget.style.background = "#2e8b7f";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation) {
+                    e.currentTarget.style.background = "#3AADA4";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }
+                }}
+                disabled={!selectedProvider || isProcessingLocation || selectedProvider === "No Insurance"}
+                aria-label="Select insurance plan"
+                title={selectedPlan || "Select Plan"}
+              >
+                <FaFileMedical
+                  size={16}
+                  style={{
+                    position: "absolute",
+                    left: "1rem",
+                    color: selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation ? "#fff" : "#6c757d",
+                  }}
+                />
+                <span
+                  style={{
+                    display: "block",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    maxWidth: "calc(100% - 0.25rem)",
+                  }}
+                >
+                  {selectedPlan || "Select Plan"}
+                </span>
+              </button>
+              <select
+                id="insurancePlan"
+                value={selectedPlan}
+                onChange={(e) => setSelectedPlan(e.target.value)}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  opacity: 0,
+                  cursor: selectedProvider && selectedProvider !== "No Insurance" && !isProcessingLocation ? "pointer" : "not-allowed",
+                }}
+                disabled={!selectedProvider || isProcessingLocation || selectedProvider === "No Insurance"}
+              >
+                <option value="" disabled>
+                  Select Plan
+                </option>
+                {selectedProvider && insurancePlans[selectedProvider].map((plan, idx) => (
+                  <option key={idx} value={plan}>
+                    {plan}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ flex: 1, position: "relative", maxWidth: "calc(50% - 0.375rem)" }}>
+              <button
+                id="address"
+                className="btn"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  background: isProcessingLocation ? "#e9ecef" : "#3AADA4",
+                  color: isProcessingLocation ? "#6c757d" : "#fff",
+                  padding: "0.75rem 0.5rem 0.75rem 2.5rem",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
+                  transition: "all 0.3s ease",
+                  fontSize: "0.95rem",
+                  fontWeight: "600",
+                  boxShadow: isProcessingLocation ? "none" : "0 3px 6px rgba(58, 173, 164, 0.3)",
+                  width: "100%",
+                  height: "44px",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  if (!isProcessingLocation) {
+                    e.currentTarget.style.background = "#2e8b7f";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isProcessingLocation) {
+                    e.currentTarget.style.background = "#3AADA4";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }
+                }}
+                onClick={() => setShowAddressPopup(true)}
+                disabled={isProcessingLocation}
+                aria-label={isAddressEntered ? `Edit address: ${address}` : "Enter address manually"}
+                title={isAddressEntered ? address : "Enter address manually"}
+              >
+                <FaMapMarkerAlt
+                  size={16}
+                  style={{
+                    position: "absolute",
+                    left: "1rem",
+                    color: isProcessingLocation ? "#6c757d" : "#fff",
+                  }}
+                />
+                <span
+                  style={{
+                    display: "block",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    maxWidth: "calc(100% - 0.25rem)",
+                  }}
+                >
+                  {getLocationButtonText()}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <div style={{ flex: 1, position: "relative", maxWidth: "calc(50% - 0.375rem)" }}>
+              <input
+                type="text"
+                value={cptCodeType}
+                onChange={(e) => setCptCodeType(e.target.value)}
+                placeholder="CPT Code Type (e.g., Surgery)"
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "10px",
+                  border: "2px solid #ced4da",
+                  fontSize: "0.95rem",
+                  outline: "none",
+                  boxSizing: "border-box",
+                  background: isProcessingLocation ? "#e9ecef" : "#fff",
+                  color: isProcessingLocation ? "#6c757d" : "#212529",
+                }}
+                disabled={isProcessingLocation}
+              />
+            </div>
+            <div style={{ flex: 1, position: "relative", maxWidth: "calc(50% - 0.375rem)" }}>
+              <input
+                type="text"
+                value={cptValues}
+                onChange={(e) => setCptValues(e.target.value)}
+                placeholder="CPT Values (e.g., 99213, 99214)"
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "10px",
+                  border: "2px solid #ced4da",
+                  fontSize: "0.95rem",
+                  outline: "none",
+                  boxSizing: "border-box",
+                  background: isProcessingLocation ? "#e9ecef" : "#fff",
+                  color: isProcessingLocation ? "#6c757d" : "#212529",
+                }}
+                disabled={isProcessingLocation}
+              />
+            </div>
+          </div>
+
+          <button
+            className="btn"
+            disabled={isSearchDisabled}
+            style={{
+              width: "100%",
+              background: isSearchDisabled ? "#ccc" : "#241A90",
+              color: "#fff",
+              padding: "0.75rem",
+              borderRadius: 12,
+              border: "2px solid",
+              borderColor: isSearchDisabled ? "#ccc" : "#241A90",
+              cursor: isSearchDisabled ? "not-allowed" : "pointer",
+              transition: "background-color 0.2s ease, border-color 0.2s ease",
+              fontWeight: "bold",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            }}
+            onMouseOver={(e) => {
+              if (!isSearchDisabled) {
+                e.currentTarget.style.background = "#3b2dbb";
+                e.currentTarget.style.borderColor = "#3b2dbb";
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!isSearchDisabled) {
+                e.currentTarget.style.background = "#241A90";
+                e.currentTarget.style.borderColor = "#241A90";
+              }
+            }}
+            onClick={handleSearchClick}
+          >
+            Find Hospitals Near Me
+          </button>
         </div>
 
         <AnimatePresence>
@@ -553,262 +941,6 @@ const Questionnaire = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
-        <div
-          style={{
-            position: "fixed",
-            bottom: "6rem",
-            left: 0,
-            right: 0,
-            margin: "0 auto",
-            width: "100%",
-            maxWidth: "700px",
-            paddingLeft: "1rem",
-            paddingRight: "1rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.75rem",
-            zIndex: 100,
-            boxSizing: "border-box",
-            backgroundColor: "white",
-          }}
-        >
-          <div
-            className="input-group"
-            style={{
-              background: "#f8f9fa",
-              border: "2px solid #ced4da",
-              borderRadius: 20,
-              overflow: "hidden",
-              padding: "0.5rem",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            }}
-          >
-            <textarea
-              className="form-control border-0 bg-transparent"
-              placeholder="Type your symptoms or preferences…"
-              rows={1}
-              style={{ resize: "none", boxShadow: "none" }}
-              value={inputValue}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyPress}
-              disabled={isProcessingLocation}
-            />
-            <button
-              className="btn"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "#241A90",
-                color: "#fff",
-                border: "none",
-                borderRadius: "50%",
-                width: 40,
-                height: 40,
-                padding: 0,
-                lineHeight: 0,
-              }}
-              onMouseOver={(e) => (e.currentTarget.style.background = "#3b2dbb")}
-              onMouseOut={(e) => (e.currentTarget.style.background = "#241A90")}
-              onClick={handleSubmit}
-              disabled={isProcessingLocation}
-            >
-              <FaArrowRight size={16} />
-            </button>
-          </div>
-
-          <div style={{ display: "flex", gap: "1rem" }}>
-            <div style={{ flex: 1, position: "relative", maxWidth: "calc(50% - 0.5rem)" }}>
-              <button
-                onClick={() => {
-                  const select = document.getElementById("insurance");
-                  select.focus();
-                  select.click();
-                }}
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  background: isProcessingLocation ? "#e9ecef" : "#3AADA4",
-                  color: "#fff",
-                  padding: "0.75rem 0.5rem 0.75rem 2.5rem",
-                  borderRadius: 10,
-                  border: "none",
-                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
-                  transition: "all 0.3s ease",
-                  fontSize: "0.95rem",
-                  fontWeight: "600",
-                  boxShadow: isProcessingLocation ? "none" : "0 3px 6px rgba(58, 173, 164, 0.3)",
-                  width: "100%",
-                  height: "44px",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-                onMouseOver={(e) => {
-                  if (!isProcessingLocation) {
-                    e.currentTarget.style.background = "#2e8b7f";
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!isProcessingLocation) {
-                    e.currentTarget.style.background = "#3AADA4";
-                    e.currentTarget.style.transform = "translateY(0)";
-                  }
-                }}
-                disabled={isProcessingLocation}
-                aria-label="Select insurance provider"
-                title={selectedInsurance || "Select Insurance"}
-              >
-                <FaShieldAlt
-                  size={16}
-                  style={{
-                    position: "absolute",
-                    left: "1rem",
-                    color: "#fff",
-                  }}
-                />
-                <span
-                  style={{
-                    display: "block",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    maxWidth: "calc(100% - 0.25rem)",
-                  }}
-                >
-                  {selectedInsurance || "Select Insurance"}
-                </span>
-              </button>
-              <select
-                id="insurance"
-                value={selectedInsurance}
-                onChange={(e) => setSelectedInsurance(e.target.value)}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  opacity: 0,
-                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
-                }}
-                disabled={isProcessingLocation}
-              >
-                <option value="" disabled>
-                  Select Insurance
-                </option>
-                {insuranceCompanies.map((company, idx) => (
-                  <option key={idx} value={company}>
-                    {company}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ flex: 1, position: "relative", maxWidth: "calc(50% - 0.5rem)" }}>
-              <button
-                id="address"
-                className="btn"
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  background: isProcessingLocation ? "#e9ecef" : "#3AADA4",
-                  color: "#fff",
-                  padding: "0.75rem 0.5rem 0.75rem 2.5rem",
-                  borderRadius: 10,
-                  border: "none",
-                  cursor: isProcessingLocation ? "not-allowed" : "pointer",
-                  transition: "all 0.3s ease",
-                  fontSize: "0.95rem",
-                  fontWeight: "600",
-                  boxShadow: isProcessingLocation ? "none" : "0 3px 6px rgba(58, 173, 164, 0.3)",
-                  width: "100%",
-                  height: "44px",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-                onMouseOver={(e) => {
-                  if (!isProcessingLocation) {
-                    e.currentTarget.style.background = "#2e8b7f";
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!isProcessingLocation) {
-                    e.currentTarget.style.background = "#3AADA4";
-                    e.currentTarget.style.transform = "translateY(0)";
-                  }
-                }}
-                onClick={() => setShowAddressPopup(true)}
-                disabled={isProcessingLocation}
-                aria-label={isAddressEntered ? `Edit address: ${address}` : "Enter address manually"}
-                title={isAddressEntered ? address : "Enter address manually"}
-              >
-                <FaMapMarkerAlt
-                  size={16}
-                  style={{
-                    position: "absolute",
-                    left: "1rem",
-                    color: "#fff",
-                  }}
-                />
-                <span
-                  style={{
-                    display: "block",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    maxWidth: "calc(100% - 0.25rem)",
-                  }}
-                >
-                  {getLocationButtonText()}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          <button
-            className="btn"
-            disabled={isSearchDisabled}
-            style={{
-              width: "100%",
-              background: isSearchDisabled ? "#ccc" : "#241A90",
-              color: "#fff",
-              padding: "0.75rem",
-              borderRadius: 12,
-              border: "2px solid",
-              borderColor: isSearchDisabled ? "#ccc" : "#241A90",
-              cursor: isSearchDisabled ? "not-allowed" : "pointer",
-              transition: "background-color 0.2s ease, border-color 0.2s ease",
-              fontWeight: "bold",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            }}
-            onMouseOver={(e) => {
-              if (!isSearchDisabled) {
-                e.currentTarget.style.background = "#3b2dbb";
-                e.currentTarget.style.borderColor = "#3b2dbb";
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!isSearchDisabled) {
-                e.currentTarget.style.background = "#241A90";
-                e.currentTarget.style.borderColor = "#241A90";
-              }
-            }}
-            onClick={handleSearchClick}
-          >
-            {isProcessingLocation ? (
-              <div className="d-flex align-items-center justify-content-center">
-                <LoadingPage />
-              </div>
-            ) : (
-              "Find Hospitals Near Me"
-            )}
-          </button>
-        </div>
       </div>
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1000 }}>
         <Footer />
