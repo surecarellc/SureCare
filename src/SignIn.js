@@ -57,11 +57,22 @@ const SignIn = () => {
         style={{ maxWidth: 420, width: "100%", borderRadius: "20px" }}
       >
         <div className="text-center mb-4">
-          <img
-            src={fullLogo}
-            alt="SureCare Logo"
-            style={{ height: 70, objectFit: "contain" }}
-          />
+          <button
+            onClick={goToLaunchPage}
+            style={{
+              cursor: "pointer",
+              background: "none",
+              border: "none",
+              padding: 0,
+            }}
+            aria-label="Go to Home Page"
+          >
+            <img
+              src={fullLogo}
+              alt="SureCare Logo"
+              style={{ height: 70, objectFit: "contain" }}
+            />
+          </button>
         </div>
         <div id="google-signin-button" className="mb-3"></div>
         <p

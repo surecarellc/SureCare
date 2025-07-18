@@ -1,11 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "../utils/goToFunctions.js";
 import { useLocation } from "react-router-dom";
 import fullLogo from "../components/full_logo1.png";
 
-const Navbar = ({ user, onLogout }) => {
+const Navbar = ({ user: propUser, onLogout }) => {
   const { goToLaunchPage, goToAboutPage, goToHelpPage, goToSignInPage } = useNavigation();
   const location = useLocation();
+  const [user, setUser] = useState(propUser);
+
+  // Load user from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem("surecare_user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Failed to parse stored user:", error);
+      }
+    }
+  }, []);
 
   const handleNavigation = (path, navigateFunction) => {
     if (location.pathname === path) {
@@ -18,6 +31,21 @@ const Navbar = ({ user, onLogout }) => {
   // Safely get name and picture from user, accommodating your payload format
   const userName = user?.name || (user?.profile && user.profile.name) || "User";
   const userPicture = user?.picture || (user?.profile && user.profile.picture);
+
+  // Update localStorage when propUser changes
+  useEffect(() => {
+    if (propUser) {
+      localStorage.setItem("surecare_user", JSON.stringify(propUser));
+      setUser(propUser);
+    }
+  }, [propUser]);
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("surecare_user");
+    setUser(null);
+    if (onLogout) onLogout();
+  };
 
   return (
     <nav
@@ -75,7 +103,7 @@ const Navbar = ({ user, onLogout }) => {
               <span className="nav-link text-dark mx-3">Welcome, {userName}</span>
               <button
                 className="nav-link text-dark mx-3 bg-transparent border-0"
-                onClick={onLogout}
+                onClick={handleLogout}
                 aria-label="Logout"
               >
                 Logout
